@@ -618,6 +618,123 @@ paths:
         This endpoint will process a file provided either uploaded or referenced by a URL.
 
         The actions (integrity, authenticity, encryption or availability) that will be applied to the file can be fully configured with this request's body.
+  /v1/webhook:
+    post:
+      summary: Webhook
+      operationId: post-v1-webhook
+      responses:
+        '200':
+          description: Success
+          content:
+            application/json:
+              schema:
+                type: object
+                required:
+                  - success
+                properties:
+                  success:
+                    type: boolean
+                    x-stoplight:
+                      id: eqpdeghh34ir9
+      x-stoplight:
+        id: 5pns9fx3xsw1c
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              x-examples:
+                Example 1:
+                  created_at: 1705261560
+                  finalized: true
+                  id: 726283
+                  message_count: 1
+                  network:
+                    anchor_id: 726283
+                    created_at: 1705261646
+                    name: bloock_chain
+                    status: Confirmed
+                    test: true
+                    tx_hash: '0x4a7a62fff40f39ac55ac7a2a07e42acbc4b4fa20f4e9114adc9e1794a722f813'
+                  root: 061ac07cf5b439dc4d561627038f1e1a186ac672d2effa50ea4175059ecb72f8
+                  test: true
+              required:
+                - id
+                - root
+                - message_count
+                - network
+                - test
+                - finalized
+                - created_at
+              properties:
+                id:
+                  type: integer
+                  description: The Anchor ID that has been processed.
+                root:
+                  type: string
+                  description: The root associated to this anchor.
+                message_count:
+                  type: integer
+                  description: The number of records included in this anchor.
+                network:
+                  type: object
+                  required:
+                    - anchor_id
+                    - created_at
+                    - name
+                    - status
+                    - test
+                    - tx_hash
+                  description: The network transaction associated with this anchor.
+                  properties:
+                    anchor_id:
+                      type: integer
+                      description: The Anchor ID associated with this network transaction.
+                    created_at:
+                      type: integer
+                      description: The timestamp in unix seconds when this network transaction was created.
+                    name:
+                      $ref: '#/components/schemas/Networks'
+                      description: The name of network.
+                    status:
+                      type: string
+                      description: The status of the transaction.
+                    test:
+                      type: boolean
+                      description: Whether this network transaction corresponds to BLOOCK's test environment or not.
+                    tx_hash:
+                      type: string
+                      description: The transaction hash associated to this network transaction.
+                test:
+                  type: boolean
+                  description: Whether this anchor corresponds to BLOOCK's test environment or not.
+                finalized:
+                  type: boolean
+                  description: Whether this anchor is considered as finalized or not.
+                created_at:
+                  type: integer
+                  description: The timestamp in unix seconds when this anchor was created.
+      description: This endpoint will be used by BLOOCK in order to notify this API that a certain Anchor ID has been correctly processed.
+  /v1/health:
+    get:
+      summary: Health
+      tags: []
+      responses:
+        '200':
+          description: Service is healthy
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    x-stoplight:
+                      id: 9qn2oxlcghx0m
+      operationId: get-v1-health
+      x-stoplight:
+        id: a02lb52ivwqym
+      description: Returns basic API health information for monitoring
 components:
   schemas:
     KeySource:
@@ -676,6 +793,15 @@ components:
           x-stoplight:
             id: gmm99tkazbd9u
           description: 'If availabile, the subject of the certificate used for this signature.'
+    Networks:
+      title: Networks
+      x-stoplight:
+        id: aftsu7lztxaio
+      enum:
+        - ethereum_mainnet
+        - gnosis_chain
+        - polygon_chain
+        - bloock_chain
   securitySchemes:
     secret:
       type: http

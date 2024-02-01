@@ -1,0 +1,80 @@
+openapi: 3.1.0
+x-stoplight:
+  id: zcdmumiuk5py2
+info:
+  title: Identity Managed API
+  version: '1.0'
+  summary: BLOOCK's Identity API
+  description: 'The BLOOCK Managed API is a tool to integrate [BLOOCK](https://bloock.com)''s services using an API instead of our SDKs by taking care of all the integration logic'
+servers:
+  - url: ''
+paths:
+  /v1/identity:
+    parameters: []
+    post:
+      summary: Send file
+      operationId: post-v1-process
+      responses:
+        '200':
+          description: OK
+      x-stoplight:
+        id: dn3o7emvuykwp
+components:
+  schemas:
+    User:
+      title: User
+      type: object
+      description: ''
+      examples:
+        - id: 142
+          firstName: Alice
+          lastName: Smith
+          email: alice.smith@gmail.com
+          dateOfBirth: '1997-10-31'
+          emailVerified: true
+          signUpDate: '2019-08-24'
+      properties:
+        id:
+          type: integer
+          description: Unique identifier for the given user.
+          x-stoplight:
+            id: b61u2j4se03m7
+        firstName:
+          type: string
+          x-stoplight:
+            id: 6tkjt4j934axt
+        lastName:
+          type: string
+          x-stoplight:
+            id: nhqewhcluelm4
+        email:
+          type: string
+          format: email
+          x-stoplight:
+            id: p3j8qnobiijx4
+        dateOfBirth:
+          type: string
+          format: date
+          example: '1997-10-31'
+          x-stoplight:
+            id: 1hk4q1lfw8qbd
+        emailVerified:
+          type: boolean
+          description: Set to true if the user's email has been verified.
+          x-stoplight:
+            id: j0vd36lad0jv4
+        createDate:
+          type: string
+          format: date
+          description: The date that the user was created.
+          x-stoplight:
+            id: dstq0951tvosk
+      required:
+        - id
+        - firstName
+        - lastName
+        - email
+        - emailVerified
+      x-stoplight:
+        id: 5jxiz9whw5h5j
+  securitySchemes: {}

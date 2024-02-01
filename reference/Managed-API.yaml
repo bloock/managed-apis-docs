@@ -1,0 +1,345 @@
+openapi: 3.1.0
+x-stoplight:
+  id: eifel450z45ts
+info:
+  title: Managed API
+  version: 1.x
+  summary: BLOOCK's Managed API
+  description: 'The BLOOCK Managed API is a tool to integrate [BLOOCK](https://bloock.com)''s services using an API instead of our SDKs by taking care of all the integration logic'
+  license:
+    name: MIT
+    url: 'https://raw.githubusercontent.com/bloock/bloock-managed-api/master/LICENSE'
+  contact:
+    name: BLOOCK
+    url: 'https://www.bloock.com/contact'
+    email: support@bloock.com
+  termsOfService: 'https://www.bloock.com/legal'
+servers:
+  - url: 'https://managed-api.bloock.com'
+    description: ''
+paths:
+  /v1/process:
+    parameters: []
+    post:
+      summary: Send file
+      operationId: post-v1-process
+      responses:
+        '200':
+          description: Success response
+          content:
+            application/json:
+              schema:
+                type: object
+                required:
+                  - success
+                  - hash
+                properties:
+                  success:
+                    type: boolean
+                    x-stoplight:
+                      id: 6nk5hs9ov2gx9
+                    description: Success status of the operation.
+                  hash:
+                    type: string
+                    x-stoplight:
+                      id: oy2ker3u3yph8
+                    description: The hash of the processed file
+                  integrity:
+                    type: object
+                    x-stoplight:
+                      id: nm5ff04vf7jdp
+                    description: This field will only appear if integrity has been enabled for this request.
+                    properties:
+                      enabled:
+                        type: boolean
+                        x-stoplight:
+                          id: 4e7yf66wlb3de
+                        description: Whether integrity has ben enabled for this request.
+                      anchor_id:
+                        type: integer
+                        x-stoplight:
+                          id: r5qd01cp8i2av
+                        description: The Anchor ID that has been linked to this file.
+                  authenticity:
+                    type: object
+                    x-stoplight:
+                      id: si8rteha2kwxh
+                    description: This field will only appear if authenticity has been enabled for this request.
+                    properties:
+                      enabled:
+                        type: boolean
+                        x-stoplight:
+                          id: 4erdpf387ln2x
+                        description: Whether authenticity has ben enabled for this request.
+                      signatures:
+                        type: array
+                        x-stoplight:
+                          id: d5muabqap5kat
+                        description: The signatures included in the processed file.
+                        items:
+                          $ref: '#/components/schemas/Signature'
+                          x-stoplight:
+                            id: sms41yghcjz2v
+                  encryption:
+                    type: object
+                    x-stoplight:
+                      id: mz98kfv0w6dpe
+                    description: This field will only appear if encryption has been enabled for this request.
+                    properties:
+                      enabled:
+                        type: boolean
+                        x-stoplight:
+                          id: qwx305csysye6
+                        description: Whether encryption has ben enabled for this request.
+                      key:
+                        type: string
+                        x-stoplight:
+                          id: 3nl186bhzgoq0
+                        description: The public key of the key used for encrypting the file.
+                      alg:
+                        x-stoplight:
+                          id: d8c4dt9khrv2k
+                        enum:
+                          - A256GCM
+                          - A256GCM_M
+                          - RSA
+                          - RSA_M
+                        example: RSA
+                        description: The encryption algorithm used.
+                      subject:
+                        type: string
+                        x-stoplight:
+                          id: bsvptook65qiy
+                        description: 'If availabile, the subject of the certificate used for encrypting this file.'
+                  availability:
+                    type: object
+                    x-stoplight:
+                      id: g8t74psnqcx9z
+                    description: This field will only appear if availability has been enabled for this request.
+                    properties:
+                      enabled:
+                        type: boolean
+                        x-stoplight:
+                          id: 8xl4dxi2a55t1
+                        description: Whether availability has ben enabled for this request.
+                      type:
+                        $ref: '#/components/schemas/AvailabilityType'
+                        x-stoplight:
+                          id: 0gzvvk61hw3wf
+                        description: The availability type where the processed file has been published to.
+                      id:
+                        type: string
+                        x-stoplight:
+                          id: 6f8r2rnhirm9r
+                        description: 'If available, the ID associated with the availability type used.'
+                      url:
+                        type: string
+                        x-stoplight:
+                          id: akre7aaur7lyo
+                        format: uri
+                        description: The URL where the processed file has been published.
+                      content_type:
+                        type: string
+                        x-stoplight:
+                          id: obkrfqark53jq
+                        description: 'If detected, the MIME type of the file.'
+                      size:
+                        type: integer
+                        x-stoplight:
+                          id: w9p1ohsrzd50l
+                        description: 'The size, in bytes, of the processed file.'
+              examples:
+                Example 1:
+                  value:
+                    success: true
+                    hash: baa09b1a6a851ecaa84936746e076356c2f060b6508de0b2d685252dadb44b39
+                    integrity:
+                      enabled: true
+                      anchor_id: 369805
+                    authenticity:
+                      enabled: true
+                      signatures:
+                        - signature: b3866ed3f169e241a1ace56e51b09a59dc13327d6406cd17930e3b8b627045484cb378d2a74db13f9109bafb478ac38730d580cd0e37de55e1d3dc407f50cb32
+                          alg: ES256K_M
+                          kid: 04aef8198dee9905ab7d984b88618617a5b5fbc035916ad36b41d726b3bb2717a67af307241b749174b346a82cfbfd48e5ed050f452ef628e3ba8f5c50da7c63e5
+                          message_hash: e920f86ee9687d365b8085222df2000cc5e72b1dc0bc3c6f42705bff5e625b0b
+                          subject: 'C=US,CN=Bloock'
+                    encryption:
+                      enabled: true
+                      key: |
+                        -----BEGIN PUBLIC KEY-----
+                        MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEAs+XX9p/A/MW95k16WNjJ
+                        xqpUw/dmLHpxo+YNFeJUfGZRHhQ3cRNFtt6kBGDpbBcnJDVcsR81FxC0prYwMT8J
+                        otzla2i89bG+szvHIAUnZljMuhnXrLhEkKcHw/QYU3p6LsL4CTt6qWnCxj4JTIET
+                        +SdM8qXOdGJ5X/y4Hnzljc+nevGImsWY3BdK68SP5TqFz+jENPRDlzwwaSi4NRAW
+                        yF+vCn2fV+sZ2nZmTCPOs4Mn7okw05cty0hBomt+LiM7te+fpFVINFOWNCIhs36F
+                        JDT3Bfv8xCo0h8K3qCxFaukv7uxOezrr55afGG+DXRU5c80QrzMoSHAg2UyABwgE
+                        gQIDAQAB
+                        -----END PUBLIC KEY-----
+                      alg: RSA_M
+                      subject: 'C=US,CN=Bloock'
+                    availability:
+                      enabled: true
+                      type: IPFS
+                      id: IPFS HASH
+                      url: 'http://example.com'
+                      content_type: application/pdf
+                      size: 52550
+      x-stoplight:
+        id: 0d90x9siw4hkx
+      requestBody:
+        content:
+          multipart/form-data:
+            schema:
+              type: object
+              properties:
+                file:
+                  type: string
+                  x-stoplight:
+                    id: c32m5v0esr99h
+                  format: binary
+                url:
+                  type: string
+                  x-stoplight:
+                    id: g2xxltyh2gh5w
+                  format: uri
+                integrity.enabled:
+                  type: boolean
+                  x-stoplight:
+                    id: weqiy55twb5hb
+                authenticity.enabled:
+                  type: boolean
+                  x-stoplight:
+                    id: y4iexp1idt2p7
+                authenticity.keySource:
+                  $ref: '#/components/schemas/KeySource'
+                  x-stoplight:
+                    id: z1irbxf8bif6h
+                authenticity.key:
+                  type: string
+                  x-stoplight:
+                    id: 9ehrbza4bq21n
+                  format: uuid
+                encryption.enabled:
+                  type: boolean
+                  x-stoplight:
+                    id: e2ybqlsdd4r0a
+                encryption.keySource:
+                  $ref: '#/components/schemas/KeySource'
+                  x-stoplight:
+                    id: fh5avo71o7gpn
+                encryption.key:
+                  type: string
+                  x-stoplight:
+                    id: ixzcjj0w5wurb
+                  format: uuid
+                availability.enabled:
+                  type: boolean
+                  x-stoplight:
+                    id: 91itknfc7czo6
+                availability.type:
+                  $ref: '#/components/schemas/AvailabilityType'
+                  x-stoplight:
+                    id: 2d14qyggo8ero
+            examples:
+              All actions:
+                value:
+                  url: 'http://example.com'
+                  integrity.enabled: true
+                  authenticity.enabled: true
+                  authenticity.keySource: MANAGED_KEY
+                  authenticity.key: 02e580b0-5c03-4f8d-a684-10658829fdbd
+                  encryption.enabled: true
+                  encryption.keySource: MANAGED_CERTIFICATE
+                  encryption.key: 9893cc1e-d391-4bab-91e6-2106ae6d59f5
+                  availability.enabled: true
+                  availability.type: IPFS
+              Integrity + Availability:
+                value:
+                  url: 'http://example.com'
+                  integrity.enabled: true
+              Authenticity + Availability:
+                value:
+                  url: 'http://example.com'
+                  authenticity.enabled: true
+                  authenticity.keySource: MANAGED_CERTIFICATE
+                  authenticity.key: 02e580b0-5c03-4f8d-a684-10658829fdbd
+                  availability.enabled: true
+                  availability.type: IPFS
+      parameters: []
+      security:
+        - {}
+        - secret: []
+        - api-key: []
+      description: |-
+        This endpoint will process a file provided either uploaded or referenced by a URL.
+
+        The actions (integrity, authenticity, encryption or availability) that will be applied to the file can be fully configured with this request's body.
+components:
+  schemas:
+    KeySource:
+      title: KeySource
+      x-stoplight:
+        id: 2le6pdyo0yewy
+      enum:
+        - LOCAL_KEY
+        - MANAGED_KEY
+        - LOCAL_CERTIFICATE
+        - MANAGED_CERTIFICATE
+    AvailabilityType:
+      title: AvailabilityType
+      x-stoplight:
+        id: 2yay6geoq0cuk
+      enum:
+        - NONE
+        - LOCAL
+        - HOSTED
+        - IPFS
+    Signature:
+      title: Signature
+      x-stoplight:
+        id: 2uoxknxhcac3o
+      type: object
+      properties:
+        signature:
+          type: string
+          x-stoplight:
+            id: qwmrexpijsc0y
+          description: The computed signature.
+        alg:
+          x-stoplight:
+            id: vjkxrwie95taa
+          description: The signature algorithm.
+          enum:
+            - ES256K
+            - ES256K_M
+            - RSA
+            - RSA_M
+            - BJJ
+            - BJJ_M
+          example: RSA
+        kid:
+          type: string
+          x-stoplight:
+            id: tddqz0v5eiid4
+          description: The public key of the key used for signing the file.
+        message_hash:
+          type: string
+          x-stoplight:
+            id: pmdqbbxnmwmxl
+          description: The hash of the file that has produced the signature.
+        subject:
+          type: string
+          x-stoplight:
+            id: gmm99tkazbd9u
+          description: 'If availabile, the subject of the certificate used for this signature.'
+  securitySchemes:
+    secret:
+      type: http
+      scheme: bearer
+      description: 'If enabled, requests must be authenticated using the secret defined in the Configuration.'
+    api-key:
+      name: API Key
+      type: apiKey
+      in: header
+      description: 'Optionaly, you can use the X-API-KEY header to override the API Key that will be used for this specific request.'

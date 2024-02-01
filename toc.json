@@ -1,0 +1,58 @@
+{
+  "collapseTableOfContents": false,
+  "items": [
+    {
+      "type": "item",
+      "title": "Overview",
+      "uri": "/docs/Overview.md"
+    },
+    { 
+      "type": "divider",
+      "title": "Managed API"
+    },
+    {
+      "type": "item",
+      "title": "Overview",
+      "uri": "/docs/Managed-API-Overview.md"
+    },
+    {
+      "type": "item",
+      "title": "Configuration",
+      "uri": "/docs/Managed-API-Configuration.md"
+    },
+    {
+      "type": "item",
+      "title": "Deployment",
+      "uri": "/docs/Managed-API-Deployment.md"
+    },
+    {
+      "type": "item",
+      "title": "Managed API",
+      "uri": "/reference/Managed-API.yaml"
+    },
+    { 
+      "type": "divider",
+      "title": "Identity Managed API"
+    },
+    {
+      "type": "item",
+      "title": "Overview",
+      "uri": "/docs/Identity-Managed-API-Overview.md"
+    },
+    {
+      "type": "item",
+      "title": "Configuration",
+      "uri": "/docs/Identity-Managed-API-Configuration.md"
+    },
+    {
+      "type": "item",
+      "title": "Deployment",
+      "uri": "/docs/Identity-Managed-API-Deployment.md"
+    },
+    {
+      "type": "item",
+      "title": "Identity Managed API",
+      "uri": "/reference/Identity Managed API.yaml"
+    }
+  ]
+}

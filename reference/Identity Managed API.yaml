@@ -2,7 +2,7 @@ openapi: 3.1.0
 x-stoplight:
   id: zcdmumiuk5py2
 info:
-  title: Identity Managed API
+  title: Identity Server
   version: '1.0'
   summary: BLOOCK's Identity API
   description: 'The BLOOCK Managed API is a tool to integrate [BLOOCK](https://bloock.com)''s services using an API instead of our SDKs by taking care of all the integration logic'

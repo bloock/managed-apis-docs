@@ -330,44 +330,109 @@ paths:
           application/json:
             schema:
               type: object
-              example:
-                schema_id: QmTk4kZxm2jfCWQpgcpPWKQi4Cgkt1EWpGBBkr2gdTLzdL
-                holder_did: 'did:polygonid:polygon:mumbai:2qGg7TzmcoU4Jg3E86wXp4WJcyGUTuafPZxVRxpYQr'
+              x-examples:
+                Example 1:
+                  schema_id: QmVQeuTBX9bkzBTPwZK3NJQD8pkCp4AsMCTPgufnqUrS6X
+                  holder_did: 'did:polygonid:polygon:mumbai:2qGg7TzmcoU4Jg3E86wXp4WJcyGUTuafPZxVRxpYQr'
+                  credential_subject:
+                    - key: birth_date
+                      value: '1999-03-20'
+                    - key: car_points
+                      value: 5
+                    - key: car_type
+                      value: big
+                    - key: is_spanish
+                      value: true
+                    - key: license_type
+                      value: 922337203685477
+                    - key: local_hour
+                      value: '2023-08-29T12:24:14+00:00'
+                    - key: nif
+                      value: 566666666U
+                    - key: precision_wheels
+                      value: 1.2
+                    - key: quantity_oil
+                      value: 1.15555555555
+                  expiration: 11724482542
+                  version: 0
+              required:
+                - schema_id
+                - holder_did
+                - credential_subject
+                - expiration
+                - version
+              properties:
+                schema_id:
+                  type: string
+                  description: What is the schema id reference.
+                holder_did:
+                  type: string
+                  description: Who is going to be the credential holder.
                 credential_subject:
-                  - key: birth_date
-                    value: '1999-03-20'
-                  - key: car_points
-                    value: 5
-                  - key: car_type
-                    value: big
-                  - key: is_spanish
-                    value: true
-                  - key: license_type
-                    value: 922337203685477600
-                  - key: local_hour
-                    value: '2023-08-29T12:24:14+00:00'
-                  - key: nif
-                    value: 566666666U
-                  - key: precision_wheels
-                    value: 1.2
-                  - key: quantity_oil
-                    value: 1.15555555555
-                expiration: 11724482542
-                version: 0
+                  type: array
+                  description: The credential attributes.
+                  items:
+                    type: object
+                    properties:
+                      key:
+                        type: string
+                        description: It must be the key associated to the attribute of your schema.
+                      value:
+                        type:
+                          - integer
+                          - number
+                          - string
+                          - boolean
+                        description: The value of the attribute.
+                expiration:
+                  type: integer
+                  description: 'The expiration must be in [unix timestamp](https://www.unixtimestamp.com/) format.'
+                version:
+                  type: integer
+                  description: 'If you want to add a version to the credential, by default you can leave 0.'
+            examples:
+              Example 1:
+                value:
+                  schema_id: QmYfn6V528p9rXj1U2oXeMq7QxjDVnCp58WYxVLiqk8dZU
+                  holder_did: 'did:polygonid:polygon:main:2q544HUegzeRpwr3V2qu9eMwgrAmF5x4E1NCPzbQc2'
+                  credential_subject:
+                    - key: nif
+                      value: 11111111M
+                  expiration: 1770381786
+                  version: 0
       parameters:
         - name: issuer_key
           in: query
           schema:
             type: string
-          description: issuer managed key (UUID). OPTIONAL.
+            example: 45f16e2c-085a-4bf9-ace1-71c30dee7ef3
+          description: issuer managed key (UUID). Leave it empty if you want to use the issuer deployed locally.
           example: '1bf0c79e-55e6-4f14-aa9d-fb55619ba0cf '
       responses:
         '200':
           description: Successful response
           content:
-            application/json: {}
+            application/json:
+              schema:
+                type: object
+                properties:
+                  id:
+                    type: string
+                x-examples:
+                  Example 1:
+                    id: 2775300b-1f8b-4955-88d5-e25f633304ed
+              examples:
+                Example 1:
+                  value:
+                    id: 5b65bb1c-635d-4b90-835d-994337d60246
       x-stoplight:
         id: hts2w9yp3au97
+      operationId: post-v1-create-credential
+      security:
+        - {}
+        - api-key: []
+        - secret: []
+      description: 'This endpoint will create a [Verifiable Credential 2.0](https://www.w3.org/TR/vc-data-model-2.0/#introduction).'
   '/v1/credentials/{id}':
     get:
       tags:
@@ -383,9 +448,237 @@ paths:
         '200':
           description: Successful response
           content:
-            application/json: {}
+            application/json:
+              schema:
+                type: object
+                properties:
+                  id:
+                    type: string
+                  '@context':
+                    type: array
+                    items:
+                      type: string
+                  type:
+                    type: array
+                    items:
+                      type: string
+                  expirationDate:
+                    type: string
+                  issuanceDate:
+                    type: string
+                  credentialSubject:
+                    type: object
+                    properties:
+                      id:
+                        type: string
+                      nif:
+                        type: string
+                      type:
+                        type: string
+                  credentialStatus:
+                    type: object
+                    properties:
+                      id:
+                        type: string
+                      revocationNonce:
+                        type: integer
+                      type:
+                        type: string
+                  issuer:
+                    type: string
+                  credentialSchema:
+                    type: object
+                    properties:
+                      id:
+                        type: string
+                      type:
+                        type: string
+                  proof:
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        type:
+                          type: string
+                        issuerData:
+                          type: object
+                          properties:
+                            id:
+                              type: string
+                            state:
+                              type: object
+                              properties:
+                                claimsTreeRoot:
+                                  type: string
+                                value:
+                                  type: string
+                                txId:
+                                  type: string
+                                blockTimestamp:
+                                  type: integer
+                                blockNumber:
+                                  type: integer
+                                rootOfRoots:
+                                  type: string
+                                revocationTreeRoot:
+                                  type: string
+                            authCoreClaim:
+                              type: string
+                            mtp:
+                              type: object
+                              properties:
+                                existence:
+                                  type: boolean
+                                siblings:
+                                  type: array
+                                  items:
+                                    type: object
+                                    properties: {}
+                            credentialStatus:
+                              type: object
+                              properties:
+                                id:
+                                  type: string
+                                revocationNonce:
+                                  type: integer
+                                type:
+                                  type: string
+                        coreClaim:
+                          type: string
+                        signature:
+                          type: string
+                        mtp:
+                          type: object
+                          properties:
+                            existence:
+                              type: boolean
+                            siblings:
+                              type: array
+                              items:
+                                type: string
+                x-examples:
+                  Example 1:
+                    id: 'https://identity-managed-api.bloock.com/v1/credentials/5b65bb1c-635d-4b90-835d-994337d60246'
+                    '@context':
+                      - 'https://www.w3.org/2018/credentials/v1'
+                      - 'https://schema.iden3.io/core/jsonld/iden3proofs.jsonld'
+                      - 'https://api.bloock.com/hosting/v1/ipfs/QmaqBSGqL4mHwctEJffQE72gU653jQZAjciYjz5dJpXzs2'
+                    type:
+                      - VerifiableCredential
+                      - TestBloock
+                    expirationDate: '2026-02-06T12:43:06Z'
+                    issuanceDate: '2024-02-06T12:51:45.801672167Z'
+                    credentialSubject:
+                      id: 'did:polygonid:polygon:main:2q544HUegzeRpwr3V2qu9eMwgrAmF5x4E1NCPzbQc2'
+                      nif: 11111111M
+                      type: TestBloock
+                    credentialStatus:
+                      id: 'https://api.bloock.com/identityV2/v1/did:polygonid:polygon:main:2q4eRtLPb4KzZDGEcFRKeD9n21fRcpRyDK2jrkun2J/claims/revocation/status/1035539101'
+                      revocationNonce: 1035539101
+                      type: SparseMerkleTreeProof
+                    issuer: 'did:polygonid:polygon:main:2q4eRtLPb4KzZDGEcFRKeD9n21fRcpRyDK2jrkun2J'
+                    credentialSchema:
+                      id: 'https://api.bloock.com/hosting/v1/ipfs/QmYfn6V528p9rXj1U2oXeMq7QxjDVnCp58WYxVLiqk8dZU'
+                      type: JsonSchema2023
+                    proof:
+                      - type: BJJSignature2021
+                        issuerData:
+                          id: 'did:polygonid:polygon:main:2q4eRtLPb4KzZDGEcFRKeD9n21fRcpRyDK2jrkun2J'
+                          state:
+                            claimsTreeRoot: f7c7866f370c49cac308415b3181bf4fa6912a9a20dfeb3be29a8176046d9105
+                            value: 4be355aa1253b5f74f54e8f8f0336f34bf2bbb98694cc3f0e0ff8a67b1ca7322
+                          authCoreClaim: cca3371a6cb1b715004407e325bd993c000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000114bf6b442e5f28d313c4096675f2fccde737d56e85ec752f95cd61a20ce471ba591c9c94e465226dd5d91bd4347d887da3825069dc0181e8a43c0c33086902b0000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
+                          mtp:
+                            existence: true
+                            siblings: []
+                          credentialStatus:
+                            id: 'https://api.bloock.com/identityV2/v1/did%3Apolygonid%3Apolygon%3Amain%3A2q4eRtLPb4KzZDGEcFRKeD9n21fRcpRyDK2jrkun2J/claims/revocation/status/0'
+                            revocationNonce: 0
+                            type: SparseMerkleTreeProof
+                        coreClaim: da0499fb7ee27fce161edad10394ec0b2a00000000000000000000000000000002115caf312e33a0b0c82d57fdd240b7261d58901a346261c5ce5621136b0b00783e7cef5ec8699146748d94cb4c6f67cd292a8952410e6de0ecb4a42b449a0d00000000000000000000000000000000000000000000000000000000000000009d12b93d00000000dae185690000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
+                        signature: 6545a849172596d192b76284c7f8e5be620b1468a61132dd9acc18b30b2057a26ef3eb582ece08a6462318ef4b62b3ca9649be8248ba0dcce977f46b88a17903
+                      - type: Iden3SparseMerkleTreeProof
+                        issuerData:
+                          id: 'did:polygonid:polygon:main:2q4eRtLPb4KzZDGEcFRKeD9n21fRcpRyDK2jrkun2J'
+                          state:
+                            txId: '0x2ff0c81ae6a820fc40753dcdd68b524a457b4169898f60925da8ba681fd2d921'
+                            blockTimestamp: 1707223941
+                            blockNumber: 53192895
+                            rootOfRoots: c50c6ee8b3898ded0d8917be8980a298c4d51111cf999e7e03c4525c827acf21
+                            claimsTreeRoot: 625b1191a6c69aa7bca2f338495910275b3532246cb2fb930a94e33058740630
+                            revocationTreeRoot: '0000000000000000000000000000000000000000000000000000000000000000'
+                            value: 70180c4eb23caafa4a218a09e10063f887cd3fb433a77f5270a5059cc534dd27
+                        coreClaim: da0499fb7ee27fce161edad10394ec0b2a00000000000000000000000000000002115caf312e33a0b0c82d57fdd240b7261d58901a346261c5ce5621136b0b00783e7cef5ec8699146748d94cb4c6f67cd292a8952410e6de0ecb4a42b449a0d00000000000000000000000000000000000000000000000000000000000000009d12b93d00000000dae185690000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
+                        mtp:
+                          existence: true
+                          siblings:
+                            - '4968344917409825039254187535038159752813997896244692801621766268045072754222'
+                            - '0'
+                            - '12632645952375144709886747358312729637396287606109672954060317972791062911446'
+              examples:
+                Example 1:
+                  value:
+                    id: 'https://identity-managed-api.bloock.com/v1/credentials/5b65bb1c-635d-4b90-835d-994337d60246'
+                    '@context':
+                      - 'https://www.w3.org/2018/credentials/v1'
+                      - 'https://schema.iden3.io/core/jsonld/iden3proofs.jsonld'
+                      - 'https://api.bloock.com/hosting/v1/ipfs/QmaqBSGqL4mHwctEJffQE72gU653jQZAjciYjz5dJpXzs2'
+                    type:
+                      - VerifiableCredential
+                      - TestBloock
+                    expirationDate: '2026-02-06T12:43:06Z'
+                    issuanceDate: '2024-02-06T12:51:45.801672167Z'
+                    credentialSubject:
+                      id: 'did:polygonid:polygon:main:2q544HUegzeRpwr3V2qu9eMwgrAmF5x4E1NCPzbQc2'
+                      nif: 11111111M
+                      type: TestBloock
+                    credentialStatus:
+                      id: 'https://api.bloock.com/identityV2/v1/did:polygonid:polygon:main:2q4eRtLPb4KzZDGEcFRKeD9n21fRcpRyDK2jrkun2J/claims/revocation/status/1035539101'
+                      revocationNonce: 1035539101
+                      type: SparseMerkleTreeProof
+                    issuer: 'did:polygonid:polygon:main:2q4eRtLPb4KzZDGEcFRKeD9n21fRcpRyDK2jrkun2J'
+                    credentialSchema:
+                      id: 'https://api.bloock.com/hosting/v1/ipfs/QmYfn6V528p9rXj1U2oXeMq7QxjDVnCp58WYxVLiqk8dZU'
+                      type: JsonSchema2023
+                    proof:
+                      - type: BJJSignature2021
+                        issuerData:
+                          id: 'did:polygonid:polygon:main:2q4eRtLPb4KzZDGEcFRKeD9n21fRcpRyDK2jrkun2J'
+                          state:
+                            claimsTreeRoot: f7c7866f370c49cac308415b3181bf4fa6912a9a20dfeb3be29a8176046d9105
+                            value: 4be355aa1253b5f74f54e8f8f0336f34bf2bbb98694cc3f0e0ff8a67b1ca7322
+                          authCoreClaim: cca3371a6cb1b715004407e325bd993c000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000114bf6b442e5f28d313c4096675f2fccde737d56e85ec752f95cd61a20ce471ba591c9c94e465226dd5d91bd4347d887da3825069dc0181e8a43c0c33086902b0000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
+                          mtp:
+                            existence: true
+                            siblings: []
+                          credentialStatus:
+                            id: 'https://api.bloock.com/identityV2/v1/did%3Apolygonid%3Apolygon%3Amain%3A2q4eRtLPb4KzZDGEcFRKeD9n21fRcpRyDK2jrkun2J/claims/revocation/status/0'
+                            revocationNonce: 0
+                            type: SparseMerkleTreeProof
+                        coreClaim: da0499fb7ee27fce161edad10394ec0b2a00000000000000000000000000000002115caf312e33a0b0c82d57fdd240b7261d58901a346261c5ce5621136b0b00783e7cef5ec8699146748d94cb4c6f67cd292a8952410e6de0ecb4a42b449a0d00000000000000000000000000000000000000000000000000000000000000009d12b93d00000000dae185690000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
+                        signature: 6545a849172596d192b76284c7f8e5be620b1468a61132dd9acc18b30b2057a26ef3eb582ece08a6462318ef4b62b3ca9649be8248ba0dcce977f46b88a17903
+                      - type: Iden3SparseMerkleTreeProof
+                        issuerData:
+                          id: 'did:polygonid:polygon:main:2q4eRtLPb4KzZDGEcFRKeD9n21fRcpRyDK2jrkun2J'
+                          state:
+                            txId: '0x2ff0c81ae6a820fc40753dcdd68b524a457b4169898f60925da8ba681fd2d921'
+                            blockTimestamp: 1707223941
+                            blockNumber: 53192895
+                            rootOfRoots: c50c6ee8b3898ded0d8917be8980a298c4d51111cf999e7e03c4525c827acf21
+                            claimsTreeRoot: 625b1191a6c69aa7bca2f338495910275b3532246cb2fb930a94e33058740630
+                            revocationTreeRoot: '0000000000000000000000000000000000000000000000000000000000000000'
+                            value: 70180c4eb23caafa4a218a09e10063f887cd3fb433a77f5270a5059cc534dd27
+                        coreClaim: da0499fb7ee27fce161edad10394ec0b2a00000000000000000000000000000002115caf312e33a0b0c82d57fdd240b7261d58901a346261c5ce5621136b0b00783e7cef5ec8699146748d94cb4c6f67cd292a8952410e6de0ecb4a42b449a0d00000000000000000000000000000000000000000000000000000000000000009d12b93d00000000dae185690000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
+                        mtp:
+                          existence: true
+                          siblings:
+                            - '4968344917409825039254187535038159752813997896244692801621766268045072754222'
+                            - '0'
+                            - '12632645952375144709886747358312729637396287606109672954060317972791062911446'
       x-stoplight:
         id: f3smhfwqiahd2
+      operationId: get-v1-credential-by-id
+      description: 'This endpoint will retrieve a [Verifiable Credential 2.0](https://www.w3.org/TR/vc-data-model-2.0/#introduction).'
   '/v1/credentials/{id}/offer':
     get:
       tags:
@@ -396,7 +689,8 @@ paths:
           in: query
           schema:
             type: string
-          description: issuer managed key (UUID). OPTIONAL.
+            example: 45f16e2c-085a-4bf9-ace1-71c30dee7ef3
+          description: issuer managed key (UUID). Leave it empty if you want to use the issuer deployed locally.
           example: '1bf0c79e-55e6-4f14-aa9d-fb55619ba0cf '
         - name: id
           in: path
@@ -407,9 +701,71 @@ paths:
         '200':
           description: Successful response
           content:
-            application/json: {}
+            application/json:
+              schema:
+                type: object
+                properties:
+                  id:
+                    type: string
+                  thid:
+                    type: string
+                  body:
+                    type: object
+                    properties:
+                      url:
+                        type: string
+                      credentials:
+                        type: array
+                        items:
+                          type: object
+                          properties:
+                            id:
+                              type: string
+                            description:
+                              type: string
+                  from:
+                    type: string
+                  to:
+                    type: string
+                  typ:
+                    type: string
+                  type:
+                    type: string
+                x-examples:
+                  Example 1:
+                    id: d8d05df3-c4ef-11ee-867f-a2501f0e3e5f
+                    thid: d8d05df3-c4ef-11ee-867f-a2501f0e3e5f
+                    body:
+                      url: 'https://identity-managed-api.bloock.com/v1/credentials/redeem?thread_id=d8d05df3-c4ef-11ee-867f-a2501f0e3e5f'
+                      credentials:
+                        - id: 5b65bb1c-635d-4b90-835d-994337d60246
+                          description: TestBloock
+                    from: 'did:polygonid:polygon:main:2q4eRtLPb4KzZDGEcFRKeD9n21fRcpRyDK2jrkun2J'
+                    to: 'did:polygonid:polygon:main:2q544HUegzeRpwr3V2qu9eMwgrAmF5x4E1NCPzbQc2'
+                    typ: application/iden3comm-plain-json
+                    type: 'https://iden3-communication.io/credentials/1.0/offer'
+              examples:
+                Example 1:
+                  value:
+                    id: d8d05df3-c4ef-11ee-867f-a2501f0e3e5f
+                    thid: d8d05df3-c4ef-11ee-867f-a2501f0e3e5f
+                    body:
+                      url: 'https://identity-managed-api.bloock.com/v1/credentials/redeem?thread_id=d8d05df3-c4ef-11ee-867f-a2501f0e3e5f'
+                      credentials:
+                        - id: 5b65bb1c-635d-4b90-835d-994337d60246
+                          description: TestBloock
+                    from: 'did:polygonid:polygon:main:2q4eRtLPb4KzZDGEcFRKeD9n21fRcpRyDK2jrkun2J'
+                    to: 'did:polygonid:polygon:main:2q544HUegzeRpwr3V2qu9eMwgrAmF5x4E1NCPzbQc2'
+                    typ: application/iden3comm-plain-json
+                    type: 'https://iden3-communication.io/credentials/1.0/offer'
       x-stoplight:
         id: wfd8zsqcv05z7
+      operationId: get-v1-credential-offer
+      description: 'This endpoint will offer a [Verifiable Credential 2.0](https://www.w3.org/TR/vc-data-model-2.0/#introduction) to a holder. For now, it is only compatible with the [PolygonID wallet](https://play.google.com/store/apps/details?id=com.polygonid.wallet&hl=en_US&pli=1).'
+      security:
+        - {}
+        - api-key: []
+        - secret: []
   '/v1/credentials/{id}/revocation':
     put:
       tags:
@@ -422,7 +778,8 @@ paths:
           in: query
           schema:
             type: string
-          description: issuer managed key (UUID). OPTIONAL.
+            example: 45f16e2c-085a-4bf9-ace1-71c30dee7ef3
+          description: issuer managed key (UUID). Leave it empty if you want to use the issuer deployed locally.
           example: '1bf0c79e-55e6-4f14-aa9d-fb55619ba0cf '
         - name: id
           in: path
@@ -433,9 +790,27 @@ paths:
         '200':
           description: Successful response
           content:
-            application/json: {}
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                x-examples:
+                  Example 1:
+                    success: true
+              examples:
+                Example 1:
+                  value:
+                    success: true
       x-stoplight:
         id: cw4n9sfyztsyp
+      operationId: put-v1-revoke-credential
+      description: 'This endpoint will revoke a [Verifiable Credential 2.0](https://www.w3.org/TR/vc-data-model-2.0/#introduction). The revocation process will be effective when the issuer has transacted its status again, at which time it will be registered in the blockchain that the credential has been revoked.'
+      security:
+        - {}
+        - api-key: []
+        - secret: []
   /v1/issuers/state/publish:
     post:
       tags:
@@ -448,15 +823,35 @@ paths:
           in: query
           schema:
             type: string
-          description: issuer managed key (UUID). OPTIONAL.
+            example: 45f16e2c-085a-4bf9-ace1-71c30dee7ef3
+          description: issuer managed key (UUID). Leave it empty if you want to use the issuer deployed locally.
           example: '1bf0c79e-55e6-4f14-aa9d-fb55619ba0cf '
       responses:
         '200':
           description: Successful response
           content:
-            application/json: {}
+            application/json:
+              schema:
+                type: object
+                x-examples:
+                  Example 1:
+                    tx_hash: '0x2ff0c81ae6a820fc40753dcdd68b524a457b4169898f60925da8ba681fd2d921'
+                properties:
+                  tx_hash:
+                    type: string
+                    description: 'You can check this transaction hash on [Polygon PoS explorer](https://polygonscan.com/)'
+              examples:
+                Example 1:
+                  value:
+                    tx_hash: '0x2ff0c81ae6a820fc40753dcdd68b524a457b4169898f60925da8ba681fd2d921'
       x-stoplight:
         id: 6pbnynar8twd2
+      operationId: post-v1-publish-issuer-state
+      description: This endpoint will allow you to make a state transition to your issuer. It is important that you execute these transitions so that your credentials can have more evidence and proof to be verified.
+      security:
+        - {}
+        - api-key: []
+        - secret: []
   /v1/issuers:
     get:
       tags:
@@ -466,9 +861,23 @@ paths:
         '200':
           description: Successful response
           content:
-            application/json: {}
+            application/json:
+              schema:
+                type: object
+                properties:
+                  did:
+                    type: string
+                x-examples:
+                  Example 1:
+                    did: ''
+              examples:
+                Example 1:
+                  value:
+                    did: ''
       x-stoplight:
         id: b81rgd7n0rafg
+      operationId: get-v1-issuer
+      description: Retrieves the issuer DID. **This endpoint will only respond with the DID if an issuer has been generated locally.**
     post:
       tags:
         - Issuer
@@ -478,31 +887,60 @@ paths:
           multipart/form-data:
             schema:
               type: object
+              required:
+                - key
+                - publish_interval
               properties:
                 key:
                   type: string
-                  description: issuer BJJ key. REQUIRED
                   example: '1bf0c79e-55e6-4f14-aa9d-fb55619ba0cf '
+                  description: 'Issuer Baby JubJub(BJJ) managed key (UUID). '
                 name:
                   type: string
-                  description: OPTIONAL
+                  description: Name of the issuer.
                 description:
                   type: string
-                  description: OPTIONAL
+                  description: Description of the issuer
                 image:
                   type: string
-                  description: OPTIONAL
                   format: binary
+                  description: Image metadata.
                 publish_interval:
                   type: string
-                  description: OPTIONAL
+                  description: 'This is the frequency at which the state of your local issuer will be transacted to blockchain. You must pass one of the following values: 1, 5, 15 or 60. Representing every 1 minute, 5 minutes, 15 minutes or 60 minutes.'
+            examples:
+              Example 1:
+                value:
+                  key: 45f16e2c-085a-4bf9-ace1-71c30dee7ef3
+                  name: Bloock Issuer Test
+                  description: bloock issuer test for description
+                  image: iVBORw0KGgoAAAANSUhEUgAAAQAAAAEAEAAAAAApiSv5AAAHQklEQVR4nOydQW7luA4Afz5y_yv3rCZ-C4IiTdrpQVWtGm1bUpKCQEgi9f3nz_8E...
+                  publish_interval: 60
       responses:
         '200':
           description: Successful response
           content:
-            application/json: {}
+            application/json:
+              schema:
+                type: object
+                properties:
+                  did:
+                    type: string
+                x-examples:
+                  Example 1:
+                    did: 'did:polygonid:polygon:main:2q4eRtLPb4KzZDGEcFRKeD9n21fRcpRyDK2jrkun2J'
+              examples:
+                Example 1:
+                  value:
+                    did: 'did:polygonid:polygon:main:2q4eRtLPb4KzZDGEcFRKeD9n21fRcpRyDK2jrkun2J'
       x-stoplight:
         id: 93m3ha9knchct
+      operationId: post-v1-create-issuer
+      description: 'This endpoint generates a new issuer, thus creating a new [DID](https://www.w3.org/TR/did-core/).'
+      security:
+        - {}
+        - api-key: []
+        - secret: []
   /v1/verifications:
     post:
       tags:
@@ -513,23 +951,172 @@ paths:
           application/json:
             schema:
               type: object
-              example:
-                circuitId: credentialAtomicQuerySigV2
-                id: 1704192771
+              x-examples:
+                Example 1:
+                  circuitId: credentialAtomicQuerySigV2
+                  id: 1704192771
+                  query:
+                    allowedIssuers:
+                      - '*'
+                    context: 'https://api.bloock.dev/hosting/v1/ipfs/QmNYkCi1WNFE9G6LxtbSTRRSbyWuYqBNE6aYq3MwivyHfp'
+                    credentialSubject:
+                      birth_date: {}
+                    type: DrivingLicense
+              required:
+                - circuitId
+                - id
+                - query
+              properties:
+                circuitId:
+                  type: string
+                  description: The circuit proof it's going to validate.
+                id:
+                  type: integer
+                  description: Random id generated.
                 query:
-                  allowedIssuers:
-                    - '*'
-                  context: 'https://api.bloock.dev/hosting/v1/ipfs/QmNYkCi1WNFE9G6LxtbSTRRSbyWuYqBNE6aYq3MwivyHfp'
-                  credentialSubject:
-                    birth_date: {}
-                  type: DrivingLicense
+                  type: object
+                  required:
+                    - allowedIssuers
+                    - context
+                    - credentialSubject
+                    - type
+                  properties:
+                    allowedIssuers:
+                      type: array
+                      description: List of valid issuers. Use * to accept all.
+                      items:
+                        type: string
+                    context:
+                      type: string
+                      description: URL with the schema id it's going to be validated.
+                    credentialSubject:
+                      type: object
+                    type:
+                      type: string
+                      description: Is the schema type name.
+            examples:
+              Example 1:
+                value:
+                  circuitId: credentialAtomicQuerySigV2
+                  id: 1704192771
+                  query:
+                    allowedIssuers:
+                      - '*'
+                    context: 'https://api.bloock.com/hosting/v1/ipfs/QmaqBSGqL4mHwctEJffQE72gU653jQZAjciYjz5dJpXzs2'
+                    credentialSubject:
+                      nif: {}
+                    type: TestBloock
       responses:
         '200':
           description: Successful response
           content:
-            application/json: {}
+            application/json:
+              schema:
+                type: object
+                properties:
+                  id:
+                    type: string
+                  typ:
+                    type: string
+                  type:
+                    type: string
+                  thid:
+                    type: string
+                  body:
+                    type: object
+                    properties:
+                      callbackUrl:
+                        type: string
+                      reason:
+                        type: string
+                      scope:
+                        type: array
+                        items:
+                          type: object
+                          properties:
+                            id:
+                              type: integer
+                            circuitId:
+                              type: string
+                            query:
+                              type: object
+                              properties:
+                                allowedIssuers:
+                                  type: array
+                                  items:
+                                    type: string
+                                context:
+                                  type: string
+                                credentialSubject:
+                                  type: object
+                                  properties:
+                                    nif:
+                                      type: object
+                                      properties: {}
+                                type:
+                                  type: string
+                  from:
+                    type: string
+                x-examples:
+                  Example 1:
+                    id: dd436c69-7856-4e28-ae3f-4273275c559a
+                    typ: application/iden3comm-plain-json
+                    type: 'https://iden3-communication.io/authorization/1.0/request'
+                    thid: dd436c69-7856-4e28-ae3f-4273275c559a
+                    body:
+                      callbackUrl: 'https://identity-managed-api.bloock.com/v1/verifications/callback?sessionId=2323706821'
+                      reason: verification request
+                      scope:
+                        - id: 1704192771
+                          circuitId: credentialAtomicQuerySigV2
+                          query:
+                            allowedIssuers:
+                              - '*'
+                            context: 'https://api.bloock.com/hosting/v1/ipfs/QmaqBSGqL4mHwctEJffQE72gU653jQZAjciYjz5dJpXzs2'
+                            credentialSubject:
+                              nif: {}
+                            type: TestBloock
+                    from: 'did:polygonid:polygon:mumbai:2qFroxB5kwgCxgVrNGUM6EW3khJgCdHHnKTr3VnTcp'
+              examples:
+                Example 1:
+                  value:
+                    id: dd436c69-7856-4e28-ae3f-4273275c559a
+                    typ: application/iden3comm-plain-json
+                    type: 'https://iden3-communication.io/authorization/1.0/request'
+                    thid: dd436c69-7856-4e28-ae3f-4273275c559a
+                    body:
+                      callbackUrl: 'https://identity-managed-api.bloock.com/v1/verifications/callback?sessionId=2323706821'
+                      reason: verification request
+                      scope:
+                        - id: 1704192771
+                          circuitId: credentialAtomicQuerySigV2
+                          query:
+                            allowedIssuers:
+                              - '*'
+                            context: 'https://api.bloock.com/hosting/v1/ipfs/QmaqBSGqL4mHwctEJffQE72gU653jQZAjciYjz5dJpXzs2'
+                            credentialSubject:
+                              nif: {}
+                            type: TestBloock
+                    from: 'did:polygonid:polygon:mumbai:2qFroxB5kwgCxgVrNGUM6EW3khJgCdHHnKTr3VnTcp'
       x-stoplight:
         id: lwxnvudhugjdg
+      operationId: post-v1-create-verification
+      description: |-
+        This endpoint is used to initiate a verification process. Please note that in order to perform the process you must first define a verification query with your [management dashboard](https://dashboard.bloock.com/products/identity):
+        1. Go to the Digital Identity product
+        2. Click on Validation Queries
+        3. Create Query button
+        4. Fill the form. (Here you will choose the schema you want to verify, the attributes, the type of proof...).
+        5. When the query it's created, download the JSON query proof, by clicking **Download**.
+        6. Copy the raw JSON as the input request.
+
+        If you want you can use other open source compatible tools to obtain this JSON query like [Polygon Query Builder](https://schema-builder-test.polygonid.me/query-builder).
+
+        **The response json from this endpoint can be converted directly to QR code so that it can be scanned by the user who is being verified.**
+      security:
+        - {}
+        - api-key: []
+        - secret: []
   /v1/verification/status:
     get:
       tags:
@@ -540,15 +1127,30 @@ paths:
           in: query
           schema:
             type: integer
-          description: session_id generated by Create Verification endpoint.
+            example: 2323706821
+          description: session id generated by the Create Verification endpoint.
           example: '123456'
       responses:
         '200':
           description: Successful response
           content:
-            application/json: {}
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                x-examples:
+                  Example 1:
+                    success: true
+              examples:
+                Example 1:
+                  value:
+                    success: true
       x-stoplight:
         id: x8blbyky27oy1
+      operationId: get-v1-verification-status
+      description: 'This endpoint returns whether the session id (e.g 2323706821) created in the **Create Verification** endpoint is valid or not. If it returns `true` it means that the user has been successfully verified, while if it returns `false` the verification has failed.'
 x-internal: false
 components:
   securitySchemes:

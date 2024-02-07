@@ -637,6 +637,18 @@ paths:
                   x-stoplight:
                     id: 9ehrbza4bq21n
                   format: uuid
+                authenticity.accessEnabled:
+                  type: boolean
+                  x-stoplight:
+                    id: h0xgk6xxpioom
+                authenticity.accessType:
+                  $ref: '#/components/schemas/AccessControlType'
+                  x-stoplight:
+                    id: jgbt3ygt5fad7
+                authenticity.accessCode:
+                  type: string
+                  x-stoplight:
+                    id: uhikqrbjv1rix
                 encryption.enabled:
                   type: boolean
                   x-stoplight:
@@ -650,6 +662,18 @@ paths:
                   x-stoplight:
                     id: ixzcjj0w5wurb
                   format: uuid
+                encryption.accessEnabled:
+                  type: boolean
+                  x-stoplight:
+                    id: hqvi0xt3vmfnz
+                encryption.accessType:
+                  $ref: '#/components/schemas/AccessControlType'
+                  x-stoplight:
+                    id: 0wh9c4awaor4q
+                encryption.accessCode:
+                  x-stoplight:
+                    id: lmi6iduarm9gb
+                  type: string
                 availability.enabled:
                   type: boolean
                   x-stoplight:
@@ -683,6 +707,15 @@ paths:
                   authenticity.key: 02e580b0-5c03-4f8d-a684-10658829fdbd
                   availability.enabled: true
                   availability.type: IPFS
+              Authenticity + Access Control TOTP:
+                value:
+                  url: 'http://example.com'
+                  authenticity.enabled: true
+                  authenticity.keySource: MANAGED_KEY
+                  authenticity.key: 02e580b0-5c03-4f8d-a684-10658829fdbd
+                  authenticity.accessEnabled: true
+                  authenticity.accessType: TOTP
+                  authenticity.accessCode: 236787
       parameters: []
       security:
         - {}
@@ -820,6 +853,13 @@ components:
         - MANAGED_KEY
         - LOCAL_CERTIFICATE
         - MANAGED_CERTIFICATE
+    AccessControlType:
+      title: AccessControlType
+      x-stoplight:
+        id: y1tp5flxl29j1
+      enum:
+        - TOTP
+        - SECRET
     AvailabilityType:
       title: AvailabilityType
       x-stoplight:

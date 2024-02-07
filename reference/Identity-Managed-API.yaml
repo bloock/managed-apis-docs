@@ -918,7 +918,7 @@ paths:
                   description: Image metadata.
                 publish_interval:
                   type: string
-                  description: 'This is the frequency at which the state of your local issuer will be transacted to blockchain. You must pass one of the following values: 1, 5, 15 or 60. Representing every 1 minute, 5 minutes, 15 minutes or 60 minutes.'
+                  description: 'This is the frequency at which the state of your issuer will be transacted to blockchain. You must pass one of the following values: 1, 5, 15 or 60. Representing every 1 minute, 5 minutes, 15 minutes or 60 minutes.'
             examples:
               Example 1:
                 value:

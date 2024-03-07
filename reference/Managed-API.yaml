@@ -842,6 +842,43 @@ paths:
       x-stoplight:
         id: a02lb52ivwqym
       description: Returns basic API health information for monitoring
+  /v1/debug:
+    post:
+      summary: Debug
+      tags: []
+      responses:
+        '200':
+          description: This endpoint should always return a success response unless there's a misconfiguration issue.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    x-stoplight:
+                      id: 3a572sa9e89da
+      operationId: post-v1-debug
+      x-stoplight:
+        id: 1nm407iq2wha2
+      description: |
+        This endpoint is ONLY available when running the service in debug mode (see api.debug_mode configuration variable).
+
+        It enables to debug the process of sending processed files to a Client Webhook URL (see webhook.client_endpoint_url configuration variable). 
+
+        You can take this endpoint as a reference to implementing your own endpoint to receive processed files to your own API.
+      requestBody:
+        content:
+          multipart/form-data:
+            schema:
+              type: object
+              properties:
+                file:
+                  type: string
+                  x-stoplight:
+                    id: y7ff4td4f6d8o
+                  format: binary
+                  description: The already processed file
 components:
   schemas:
     KeySource:

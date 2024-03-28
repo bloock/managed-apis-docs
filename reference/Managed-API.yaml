@@ -5,7 +5,7 @@ info:
   title: Managed API
   version: 1.x
   summary: BLOOCK's Managed API
-  description: |
+  description: |-
     The BLOOCK Managed API is a tool to integrate [BLOOCK](https://bloock.com)'s services using an API instead of our SDKs by taking care of all the integration logic:
 
     ---
@@ -264,6 +264,11 @@ info:
                  certificate:
                    pkcs12_path: "./"
                    pkcs12_password: ""
+               
+               integrity:
+                  aggregate_mode: false
+                  aggregate_worker: false
+                  aggregate_interval:
         
                storage:
                  tmp_dir: "./tmp"
@@ -372,6 +377,21 @@ info:
       - **Description**: Certificate password.
       - **Purpose**: If the certificate is protected by a password, you must provide it.
 
+    As an advanced configuration option, users have the ability to enable the aggregator mode. Prior to enabling this feature, it is strongly advised to refer to the accompanying documentation for a comprehensive understanding of its functionality and implications. Once acquainted with the documentation, users can activate the aggregator mode by adjusting the specified variables as follows:
+
+    - **BLOOCK_INTEGRITY_AGGREGATE_MODE** (**_OPTIONAL_**)
+      - **Description**: Flag to enable the aggregator mode.
+      - **Default**: false
+      - **Purpose**: The process to certify a file will be changed with the aggregate feature. Basically will allow you to scale up and optimize your certifications.
+    - **BLOOCK_INTEGRITY_AGGREGATE_WORKER** (**_OPTIONAL_**)
+      - **Description**: Flag to enable the aggregator worker.
+      - **Default**: false
+      - **Purpose**: This option starts a background worker that will aggregate your certifications with a custom interval.
+    - **BLOOCK_INTEGRITY_AGGREGATE_INTERVAL** (**_OPTIONAL_**)
+      - **Description**: worker interval with seconds.
+      - **Default**: 36000
+      - **Purpose**: This option allows you to set your worker with the interval (with seconds) you need.
+
     Finally, in case you want to store your files locally, with these variables you can edit the configuration:
 
     - **BLOOCK_TMP_DIR** (**_OPTIONAL_**)
@@ -455,6 +475,11 @@ paths:
                     type: boolean
                     x-stoplight:
                       id: 6nk5hs9ov2gx9
+                    description: Success status of the operation.
+                  process_id:
+                    type: string
+                    x-stoplight:
+                      id: x9uj3yo2s7hr8
                     description: Success status of the operation.
                   hash:
                     type: string
@@ -569,6 +594,7 @@ paths:
                 Example 1:
                   value:
                     success: true
+                    process_id: f1e7e532-d817-4ac8-b43a-ca6aa7cc9118
                     hash: baa09b1a6a851ecaa84936746e076356c2f060b6508de0b2d685252dadb44b39
                     integrity:
                       enabled: true
@@ -624,10 +650,15 @@ paths:
                   type: boolean
                   x-stoplight:
                     id: weqiy55twb5hb
+                integrity.aggregate:
+                  type: boolean
+                  x-stoplight:
+                    id: 8d4driqt38kvi
                 authenticity.enabled:
                   type: boolean
                   x-stoplight:
                     id: y4iexp1idt2p7
+                  description: 'If the file it''s going to be aggregated or not. You must have the API aggregate mode activated. This file will be saved but not certified, so it will be aggregated later with other aggregated files.'
                 authenticity.keySource:
                   $ref: '#/components/schemas/KeySource'
                   x-stoplight:
@@ -879,6 +910,808 @@ paths:
                     id: y7ff4td4f6d8o
                   format: binary
                   description: The already processed file
+  /v1/aggregate:
+    put:
+      summary: Aggregate Files
+      tags: []
+      responses: {}
+      operationId: put-v1-aggregate
+      x-stoplight:
+        id: 60gmy40tr3vvk
+      description: |
+        This endpoint is designed to process all pending files submitted with aggregation enabled. These files will then be aggregated within an internal Merkle tree, with the resulting root hash subsequently sent to the BLOOCK certification API.
+
+        It's important to note that all files certified through this endpoint are required to utilize the 'Get Proof' endpoint for subsequent proof verification.
+
+        This endpoint requires to have deployed the API Managed with the 'INTEGRITY_AGGREGATE' flag configuration enabled.
+
+        Instead of requiring repeated calls to this endpoint whenever file aggregation is needed, users have the option to configure a dedicated worker to automatically execute the aggregation at specified intervals tailored to their needs. For that you need to set the 'INTEGRITY_AGGREGATE_WORKER' to true on your API Managed configuration.
+      security:
+        - {}
+        - secret: []
+        - api-key: []
+  /v1/proof:
+    post:
+      summary: Get Proof
+      tags: []
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  anchor:
+                    type: object
+                    properties:
+                      anchor_id:
+                        type: integer
+                      networks:
+                        type: array
+                        items:
+                          type: object
+                          properties:
+                            created_at:
+                              type: integer
+                            name:
+                              type: string
+                            state:
+                              type: string
+                            tx_hash:
+                              type: string
+                      root:
+                        type: string
+                      status:
+                        type: string
+                  bitmap:
+                    type: string
+                  depth:
+                    type: string
+                  leaves:
+                    type: array
+                    items:
+                      type: string
+                  nodes:
+                    type: array
+                    items:
+                      type: string
+                  root:
+                    type: string
+                x-examples:
+                  Example 1:
+                    anchor:
+                      anchor_id: 930330
+                      networks:
+                        - created_at: 1711629388
+                          name: gnosis_chain
+                          state: Confirmed
+                          tx_hash: '0x2e84f3e5ce43afdcfb0fddb3ff162679281679689bce6c44e05b42b864e025b7'
+                      root: d7c53d2f29ec3c4dfcebc11e1b342d722241842972356d47240db7464bf5cc88
+                      status: Success
+                    bitmap: fff7f0
+                    depth: 00010002000600070008000a000b000c000d000f00110012001300130010000e0009000500040003
+                    leaves:
+                      - 001886f291d6c68bef7803d0a1c96d081376f852543967e06da2c4cb5c3cf63d
+                    nodes:
+                      - 55ed66342de913f3ba186fc75faf791e9e03d839caeed5311c0876e3d0c8e7f7
+                      - 9fb913e5859c4e3fffa7d4730c060d450ca58da27bbab1706f33abd04e12bc72
+                      - b0b9c884d3910cacfa8ee5e5c428996cba295536d86c11ff50058e3375266d8c
+                      - 98da95427299cacfd7be0adffd3df744bfdfcf39ebf7a74660d696a4ffb0f3dd
+                      - 74819b0a29565ff3ae8a9bd421e1b273a8132304c226efe08474aaa8818ffadd
+                      - 0771e0a125b1a571b3c530b2edc4a8888e3af69409fc7e5267604bb316e77753
+                      - 47495e4644d38cd8af58cdb4f82870543f41e71b08bc34217c3682c674970731
+                      - 0edef28d35e6c79b9c9f59d890b4e4a6a71b90485e027dca9afcd1b5153ddb00
+                      - 1bab5089d1852d156247ac8514552b5b6cac1a164525499c0b9f63a725081b48
+                      - 8e57d0702f304ec9b53af24ec4049452cd37d235ee6b13eae70b96374202ee12
+                      - b1a1a044cfc42120a9ed0989ac07f7a2d404b9e0578a4f9292c7e84da0996376
+                      - c77a80199a622ffed8320e419d0d09d155392c729e9e8b1df573b81674c5b1fe
+                      - bfd721106bd81244b245798151678d86e6b3c7af88fe2882cc46bafde8499295
+                      - fac1664037dab77cb4abe56b83245ced5aab8696c1d69f6240e178cb8093646a
+                      - 742c01d3e7c4a89a5b95b274cf910e880fe8b736ac19b8a0ca95776db16909c2
+                      - 82721420cca25511c3675401f43bfeaf597b2a87822ed5b5d0cbeb82d104bc70
+                      - 9c3d5f746891a2b4f2a635049eeda46350cd228ab293048294807e7182df97cf
+                      - b4a084ed8239692b318eff7bae3d212ac258dd5f1685fa1729eaac81d52a8a38
+                      - a53332ca7215172e572d64e9f4fa0964d87253d88301ce03964de57441fed461
+                    root: d7c53d2f29ec3c4dfcebc11e1b342d722241842972356d47240db7464bf5cc88
+              examples:
+                Example 1:
+                  value:
+                    anchor:
+                      anchor_id: 930330
+                      networks:
+                        - created_at: 1711629388
+                          name: gnosis_chain
+                          state: Confirmed
+                          tx_hash: '0x2e84f3e5ce43afdcfb0fddb3ff162679281679689bce6c44e05b42b864e025b8'
+                      root: d7c53d2f29ec3c4dfcebc11e1b342d722241842972356d47240db7464bf5cc89
+                      status: Success
+                    bitmap: fff7f0
+                    depth: 00010002000600070008000a000b000c000d000f00110012001300130010000e0009000500040003
+                    leaves:
+                      - 001886f291d6c68bef7803d0a1c96d081376f852543967e06da2c4cb5c3cf63d
+                    nodes:
+                      - 55ed66342de913f3ba186fc75faf791e9e03d839caeed5311c0876e3d0c8e7f8
+                      - 9fb913e5859c4e3fffa7d4730c060d450ca58da27bbab1706f33abd04e12bc78
+                      - b0b9c884d3910cacfa8ee5e5c428996cba295536d86c11ff50058e3375266d88
+                      - 98da95427299cacfd7be0adffd3df744bfdfcf39ebf7a74660d696a4ffb0f3d8
+                      - 74819b0a29565ff3ae8a9bd421e1b273a8132304c226efe08474aaa8818ffad8
+                      - 0771e0a125b1a571b3c530b2edc4a8888e3af69409fc7e5267604bb316e77758
+                      - 47495e4644d38cd8af58cdb4f82870543f41e71b08bc34217c3682c674970738
+                      - 0edef28d35e6c79b9c9f59d890b4e4a6a71b90485e027dca9afcd1b5153ddb08
+                      - 1bab5089d1852d156247ac8514552b5b6cac1a164525499c0b9f63a725081b48
+                      - 8e57d0702f304ec9b53af24ec4049452cd37d235ee6b13eae70b96374202ee19
+                      - b1a1a044cfc42120a9ed0989ac07f7a2d404b9e0578a4f9292c7e84da0996377
+                      - c77a80199a622ffed8320e419d0d09d155392c729e9e8b1df573b81674c5b1f8
+                      - bfd721106bd81244b245798151678d86e6b3c7af88fe2882cc46bafde8499298
+                      - fac1664037dab77cb4abe56b83245ced5aab8696c1d69f6240e178cb80936467
+                      - 742c01d3e7c4a89a5b95b274cf910e880fe8b736ac19b8a0ca95776db16909c9
+                      - 82721420cca25511c3675401f43bfeaf597b2a87822ed5b5d0cbeb82d104bc78
+                      - 9c3d5f746891a2b4f2a635049eeda46350cd228ab293048294807e7182df97c9
+                      - b4a084ed8239692b318eff7bae3d212ac258dd5f1685fa1729eaac81d52a8a38
+                      - a53332ca7215172e572d64e9f4fa0964d87253d88301ce03964de57441fed467
+                    root: d7c53d2f29ec3c4dfcebc11e1b342d722241842972356d47240db7464bf5cc88
+      operationId: post-v1-proof
+      x-stoplight:
+        id: wv2qfimj7q47c
+      description: 'This endpoint facilitates the retrieval of a BLOOCK integrity proof for a specified aggregated file hash. If you have activated the ''INTEGRITY_AGGREGATE'' configuration flag within your API Managed settings and have previously submitted files with aggregate mode enabled, you can utilize this endpoint to obtain the integrity proof corresponding to a specific file hash.'
+      security:
+        - {}
+        - secret: []
+        - api-key: []
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              x-examples:
+                Example 1:
+                  message: 21a0150135e067d0a068384da981fc7b2f1327fa6d0bb582b383dfe599ada3e4
+              required:
+                - message
+              properties:
+                message:
+                  type: string
+                  description: File hash you receive whith the "Send File" response.
+            examples:
+              Example 1:
+                value:
+                  message: 21a0150135e067d0a068384da981fc7b2f1327fa6d0bb582b383dfe599ada3e4
+  '/v1/hashes/:id/file':
+    get:
+      summary: Get File by Hash
+      tags: []
+      responses:
+        '200':
+          description: OK
+          content: {}
+      operationId: 'get-hashes-:id-file'
+      x-stoplight:
+        id: tvtpetgfoigwb
+      security:
+        - {}
+        - secret: []
+        - api-key: []
+      description: |-
+        This endpoint facilitates the retrieval of any file of the API Managed, identified by its corresponding hash.
+
+        **The hash it's returned on "Send File" response endpoint.**
+    parameters: []
+  /v1/process/list:
+    get:
+      summary: Get Process List
+      tags: []
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                x-examples:
+                  Example 1:
+                    meta:
+                      current_page: 1
+                      per_page: 10
+                      from: 1
+                      to: 10
+                      total: 1002
+                      last_page: 101
+                    processes:
+                      - id: b080fd96-36e0-4691-a0e7-175fc024f65d
+                        status: true
+                        filename: metadata.json
+                        created_at: '2024-03-28T10:07:16.758389Z'
+                        success: true
+                        hash: 32ebbfef67ef4d3f71ab16de443812624b50716553f0731ad8c2a3805fab1d62
+                        integrity:
+                          enabled: true
+                          anchor_id: 450392
+                        authenticity:
+                          enabled: true
+                          signatures:
+                            - signature: c5732fab810fde150977dcfba07780e00f2c970cd11842a8ebbfd7a3dba8f0b3e446389a8496a956cae71e38e95ccfb867a2d1d1db7f872adfb09f1c59481695
+                              alg: ES256K_M
+                              kid: 0465fba5a3a3579f99dd69b4a57e5dc789abce472a34f05ca563b2aea62c0bac7d72ad656abace22aa18e2440f1671005451648004837f8a43f23ba26b3c5427ed
+                              message_hash: 02080c840cb18a91696a1f1ff04938a62d6a65937cffe613f83b4f8ec41fea9c
+                        encryption:
+                          enabled: true
+                          key: |
+                            -----BEGIN PUBLIC KEY-----
+                            MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEAs7aROiIjUvvlHnFTRS0l
+                            fZXB/S2W9pF9lkgqzkpFdCqzG+tnedFRgQ5CnkJYJdVrVRs9yhwymQl+ptkaCe5d
+                            5IJJlKigH58hkg5EMEs3WUheshTBlqx5JGwEA2yXM2k7uew8XaA9tTJcmQokIkbS
+                            bUbZxm99V/dGxUv0BEhribD21mzKUiIRJrLF8zZdsb9xfpjVIxw4gqaSysP2NEKo
+                            p5Uf0Br7F+WsyFowZMBvkmHQdPgyduSdvjmFoEmxEx0vfFo6idIcldoZRRcn6mrf
+                            Sf2vlfOFiaHwu8ERfy3mUmZJpR6K9Ox92/dqUjRTFfhGSiwfK+mr287KCF57r5+0
+                            GQIDAQAB
+                            -----END PUBLIC KEY-----
+                          alg: RSA_M
+                          subject: ''
+                        availability:
+                          enabled: true
+                          type: hosted
+                          id: 7fd526ca-5472-4fa4-a85b-d9cd2b446ec9
+                          url: 'https://cdn.bloock.dev/hosting/v1/hosted/7fd526ca-5472-4fa4-a85b-d9cd2b446ec9'
+                          content_type: ''
+                          size: 5166
+                      - id: 9a085ba3-37ff-4172-96e2-dc16cd4491f0
+                        status: false
+                        filename: metadata.json
+                        created_at: '2024-03-28T09:59:48.372998Z'
+                        success: true
+                        hash: 0cc9c0ed8d2a63f1b46b1b9d749b3ae55f0866b7318e2893a3b6c8772c4ca8df
+                        integrity:
+                          enabled: true
+                          anchor_id: 450386
+                        authenticity:
+                          enabled: true
+                          signatures:
+                            - signature: e12777e62f36a0c757ba2d33c1c6b64f23718b6593594f6bbff7d1369809fc81642bd81413553bb4a0aef07d0e0c5dfc9e496d4cab1125884303ccc38879b6da
+                              alg: ES256K_M
+                              kid: 0465fba5a3a3579f99dd69b4a57e5dc789abce472a34f05ca563b2aea62c0bac7d72ad656abace22aa18e2440f1671005451648004837f8a43f23ba26b3c5427ed
+                              message_hash: 02080c840cb18a91696a1f1ff04938a62d6a65937cffe613f83b4f8ec41fea9c
+                        encryption:
+                          enabled: true
+                          key: |
+                            -----BEGIN PUBLIC KEY-----
+                            MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEAs7aROiIjUvvlHnFTRS0l
+                            fZXB/S2W9pF9lkgqzkpFdCqzG+tnedFRgQ5CnkJYJdVrVRs9yhwymQl+ptkaCe5d
+                            5IJJlKigH58hkg5EMEs3WUheshTBlqx5JGwEA2yXM2k7uew8XaA9tTJcmQokIkbS
+                            bUbZxm99V/dGxUv0BEhribD21mzKUiIRJrLF8zZdsb9xfpjVIxw4gqaSysP2NEKo
+                            p5Uf0Br7F+WsyFowZMBvkmHQdPgyduSdvjmFoEmxEx0vfFo6idIcldoZRRcn6mrf
+                            Sf2vlfOFiaHwu8ERfy3mUmZJpR6K9Ox92/dqUjRTFfhGSiwfK+mr287KCF57r5+0
+                            GQIDAQAB
+                            -----END PUBLIC KEY-----
+                          alg: RSA_M
+                          subject: ''
+                        availability:
+                          enabled: true
+                          type: hosted
+                          id: ea149fe2-367d-42ba-812a-7cc96743b672
+                          url: 'https://cdn.bloock.com/hosting/v1/hosted/ea149fe2-367d-42ba-812a-7cc96743b672'
+                          content_type: ''
+                          size: 5138
+                      - id: 73e9488a-5c2f-4569-9e3b-a69eac957661
+                        status: true
+                        filename: random.pdf
+                        created_at: '2024-03-28T09:32:53.584085Z'
+                        success: true
+                        hash: 967f22134db2743a962c405acb22a3b795a40a688fbeff7825f99d7a65cc0bd9
+                        integrity:
+                          enabled: true
+                          anchor_id: 450361
+                      - id: a863bb4d-2697-4208-be4e-215f4fee0c6d
+                        status: true
+                        filename: random.pdf
+                        created_at: '2024-03-28T09:32:53.584085Z'
+                        success: true
+                        hash: 2d637b3de575b8cd92a8c4ee3ab1a717c87d32062c1b7567501388eda54952f6
+                        integrity:
+                          enabled: true
+                          anchor_id: 450361
+                      - id: 8541c8aa-c4a6-4f22-9a87-e0c805304f5f
+                        status: true
+                        filename: random.pdf
+                        created_at: '2024-03-28T09:32:53.584085Z'
+                        success: true
+                        hash: 37b3eef33062ac52cf45e1fe1cef1e09b8230aa653792bf6a14938208dae8759
+                        integrity:
+                          enabled: true
+                          anchor_id: 450361
+                      - id: db691c3c-7e03-4b57-8454-59361b08c4cf
+                        status: true
+                        filename: random.pdf
+                        created_at: '2024-03-28T09:32:53.584085Z'
+                        success: true
+                        hash: 7adfc4326d17c285f57c6b7fde8019b4246a3062d2b5db823ff12f60cf9673e3
+                        integrity:
+                          enabled: true
+                          anchor_id: 450361
+                      - id: d3879e04-fba1-4e86-ae63-55dd0cc40088
+                        status: true
+                        filename: random.pdf
+                        created_at: '2024-03-28T09:32:53.584085Z'
+                        success: true
+                        hash: 435a1d1af2ea55088aaa4d9b9ed88c719629651f786ad471cf4a5710726382eb
+                        integrity:
+                          enabled: true
+                          anchor_id: 450361
+                      - id: 227ed76f-4593-4bd0-a749-525cdd002675
+                        status: true
+                        filename: random.pdf
+                        created_at: '2024-03-28T09:32:53.584085Z'
+                        success: true
+                        hash: 823236fda76917b774a22500d34a063c63c13eb5192861f943df0cdebcb444de
+                        integrity:
+                          enabled: true
+                          anchor_id: 450361
+                      - id: 8c98d67e-1859-4fbc-96a2-412aeec249f6
+                        status: true
+                        filename: random.pdf
+                        created_at: '2024-03-28T09:32:53.584085Z'
+                        success: true
+                        hash: eebfd265c68faa1a1c72f2495840cc9765337f0ef1eeff71d70bda4493869ace
+                        integrity:
+                          enabled: true
+                          anchor_id: 450361
+                      - id: 555e0767-666a-49f7-b99a-88c4305916ba
+                        status: true
+                        filename: random.pdf
+                        created_at: '2024-03-28T09:32:53.584085Z'
+                        success: true
+                        hash: 193ab2cadcffc17e0113fc96711ccfbd527b8c54ee6ab379c70e3aac65afa5fa
+                        integrity:
+                          enabled: true
+                          anchor_id: 450361
+                properties:
+                  meta:
+                    type: object
+                    description: Describes the pagination
+                    properties:
+                      current_page:
+                        type: integer
+                      per_page:
+                        type: integer
+                      from:
+                        type: integer
+                      to:
+                        type: integer
+                      total:
+                        type: integer
+                        description: Total of results
+                      last_page:
+                        type: integer
+                        description: Number of the last page you can filter
+                  processes:
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        id:
+                          type: string
+                          description: UUID associated to the process
+                        status:
+                          type: boolean
+                          description: 'If status == true, means the certification was transacted and confimed on blockchain. Otherwise the transaction was transacted but is waiting confirmation'
+                        filename:
+                          type: string
+                        created_at:
+                          type: string
+                        success:
+                          type: boolean
+                          description: 'This success refers to the global process endpoint execution, should be always true'
+                        hash:
+                          type: string
+                        integrity:
+                          type: object
+                          properties:
+                            enabled:
+                              type: boolean
+                            anchor_id:
+                              type: integer
+                        authenticity:
+                          type: object
+                          properties:
+                            enabled:
+                              type: boolean
+                            signatures:
+                              type: array
+                              items:
+                                type: object
+                                properties:
+                                  signature:
+                                    type: string
+                                  alg:
+                                    type: string
+                                  kid:
+                                    type: string
+                                  message_hash:
+                                    type: string
+                        encryption:
+                          type: object
+                          properties:
+                            enabled:
+                              type: boolean
+                            key:
+                              type: string
+                            alg:
+                              type: string
+                            subject:
+                              type: string
+                        availability:
+                          type: object
+                          properties:
+                            enabled:
+                              type: boolean
+                            type:
+                              type: string
+                            id:
+                              type: string
+                            url:
+                              type: string
+                            content_type:
+                              type: string
+                            size:
+                              type: integer
+              examples:
+                Example 1:
+                  value:
+                    meta:
+                      current_page: 1
+                      per_page: 10
+                      from: 1
+                      to: 10
+                      total: 1002
+                      last_page: 101
+                    processes:
+                      - id: b080fd96-36e0-4691-a0e7-175fc024f65d
+                        status: true
+                        filename: metadata.json
+                        created_at: '2024-03-28T10:07:16.758389Z'
+                        success: true
+                        hash: 32ebbfef67ef4d3f71ab16de443812624b50716553f0731ad8c2a3805fab1d62
+                        integrity:
+                          enabled: true
+                          anchor_id: 450392
+                        authenticity:
+                          enabled: true
+                          signatures:
+                            - signature: c5732fab810fde150977dcfba07780e00f2c970cd11842a8ebbfd7a3dba8f0b3e446389a8496a956cae71e38e95ccfb867a2d1d1db7f872adfb09f1c59481695
+                              alg: ES256K_M
+                              kid: 0465fba5a3a3579f99dd69b4a57e5dc789abce472a34f05ca563b2aea62c0bac7d72ad656abace22aa18e2440f1671005451648004837f8a43f23ba26b3c5427ed
+                              message_hash: 02080c840cb18a91696a1f1ff04938a62d6a65937cffe613f83b4f8ec41fea9c
+                        encryption:
+                          enabled: true
+                          key: |
+                            -----BEGIN PUBLIC KEY-----
+                            MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEAs7aROiIjUvvlHnFTRS0l
+                            fZXB/S2W9pF9lkgqzkpFdCqzG+tnedFRgQ5CnkJYJdVrVRs9yhwymQl+ptkaCe5d
+                            5IJJlKigH58hkg5EMEs3WUheshTBlqx5JGwEA2yXM2k7uew8XaA9tTJcmQokIkbS
+                            bUbZxm99V/dGxUv0BEhribD21mzKUiIRJrLF8zZdsb9xfpjVIxw4gqaSysP2NEKo
+                            p5Uf0Br7F+WsyFowZMBvkmHQdPgyduSdvjmFoEmxEx0vfFo6idIcldoZRRcn6mrf
+                            Sf2vlfOFiaHwu8ERfy3mUmZJpR6K9Ox92/dqUjRTFfhGSiwfK+mr287KCF57r5+0
+                            GQIDAQAB
+                            -----END PUBLIC KEY-----
+                          alg: RSA_M
+                          subject: ''
+                        availability:
+                          enabled: true
+                          type: hosted
+                          id: 7fd526ca-5472-4fa4-a85b-d9cd2b446ec9
+                          url: 'https://cdn.bloock.dev/hosting/v1/hosted/7fd526ca-5472-4fa4-a85b-d9cd2b446ec9'
+                          content_type: ''
+                          size: 5166
+                      - id: 9a085ba3-37ff-4172-96e2-dc16cd4491f0
+                        status: false
+                        filename: metadata.json
+                        created_at: '2024-03-28T09:59:48.372998Z'
+                        success: true
+                        hash: 0cc9c0ed8d2a63f1b46b1b9d749b3ae55f0866b7318e2893a3b6c8772c4ca8df
+                        integrity:
+                          enabled: true
+                          anchor_id: 450386
+                        authenticity:
+                          enabled: true
+                          signatures:
+                            - signature: e12777e62f36a0c757ba2d33c1c6b64f23718b6593594f6bbff7d1369809fc81642bd81413553bb4a0aef07d0e0c5dfc9e496d4cab1125884303ccc38879b6da
+                              alg: ES256K_M
+                              kid: 0465fba5a3a3579f99dd69b4a57e5dc789abce472a34f05ca563b2aea62c0bac7d72ad656abace22aa18e2440f1671005451648004837f8a43f23ba26b3c5427ed
+                              message_hash: 02080c840cb18a91696a1f1ff04938a62d6a65937cffe613f83b4f8ec41fea9c
+                        encryption:
+                          enabled: true
+                          key: |
+                            -----BEGIN PUBLIC KEY-----
+                            MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEAs7aROiIjUvvlHnFTRS0l
+                            fZXB/S2W9pF9lkgqzkpFdCqzG+tnedFRgQ5CnkJYJdVrVRs9yhwymQl+ptkaCe5d
+                            5IJJlKigH58hkg5EMEs3WUheshTBlqx5JGwEA2yXM2k7uew8XaA9tTJcmQokIkbS
+                            bUbZxm99V/dGxUv0BEhribD21mzKUiIRJrLF8zZdsb9xfpjVIxw4gqaSysP2NEKo
+                            p5Uf0Br7F+WsyFowZMBvkmHQdPgyduSdvjmFoEmxEx0vfFo6idIcldoZRRcn6mrf
+                            Sf2vlfOFiaHwu8ERfy3mUmZJpR6K9Ox92/dqUjRTFfhGSiwfK+mr287KCF57r5+0
+                            GQIDAQAB
+                            -----END PUBLIC KEY-----
+                          alg: RSA_M
+                          subject: ''
+                        availability:
+                          enabled: true
+                          type: hosted
+                          id: ea149fe2-367d-42ba-812a-7cc96743b672
+                          url: 'https://cdn.bloock.com/hosting/v1/hosted/ea149fe2-367d-42ba-812a-7cc96743b672'
+                          content_type: ''
+                          size: 5138
+                      - id: 73e9488a-5c2f-4569-9e3b-a69eac957661
+                        status: true
+                        filename: random.pdf
+                        created_at: '2024-03-28T09:32:53.584085Z'
+                        success: true
+                        hash: 967f22134db2743a962c405acb22a3b795a40a688fbeff7825f99d7a65cc0bd9
+                        integrity:
+                          enabled: true
+                          anchor_id: 450361
+                      - id: a863bb4d-2697-4208-be4e-215f4fee0c6d
+                        status: true
+                        filename: random.pdf
+                        created_at: '2024-03-28T09:32:53.584085Z'
+                        success: true
+                        hash: 2d637b3de575b8cd92a8c4ee3ab1a717c87d32062c1b7567501388eda54952f6
+                        integrity:
+                          enabled: true
+                          anchor_id: 450361
+                      - id: 8541c8aa-c4a6-4f22-9a87-e0c805304f5f
+                        status: true
+                        filename: random.pdf
+                        created_at: '2024-03-28T09:32:53.584085Z'
+                        success: true
+                        hash: 37b3eef33062ac52cf45e1fe1cef1e09b8230aa653792bf6a14938208dae8759
+                        integrity:
+                          enabled: true
+                          anchor_id: 450361
+                      - id: db691c3c-7e03-4b57-8454-59361b08c4cf
+                        status: true
+                        filename: random.pdf
+                        created_at: '2024-03-28T09:32:53.584085Z'
+                        success: true
+                        hash: 7adfc4326d17c285f57c6b7fde8019b4246a3062d2b5db823ff12f60cf9673e3
+                        integrity:
+                          enabled: true
+                          anchor_id: 450361
+                      - id: d3879e04-fba1-4e86-ae63-55dd0cc40088
+                        status: true
+                        filename: random.pdf
+                        created_at: '2024-03-28T09:32:53.584085Z'
+                        success: true
+                        hash: 435a1d1af2ea55088aaa4d9b9ed88c719629651f786ad471cf4a5710726382eb
+                        integrity:
+                          enabled: true
+                          anchor_id: 450361
+                      - id: 227ed76f-4593-4bd0-a749-525cdd002675
+                        status: true
+                        filename: random.pdf
+                        created_at: '2024-03-28T09:32:53.584085Z'
+                        success: true
+                        hash: 823236fda76917b774a22500d34a063c63c13eb5192861f943df0cdebcb444de
+                        integrity:
+                          enabled: true
+                          anchor_id: 450361
+                      - id: 8c98d67e-1859-4fbc-96a2-412aeec249f6
+                        status: true
+                        filename: random.pdf
+                        created_at: '2024-03-28T09:32:53.584085Z'
+                        success: true
+                        hash: eebfd265c68faa1a1c72f2495840cc9765337f0ef1eeff71d70bda4493869ace
+                        integrity:
+                          enabled: true
+                          anchor_id: 450361
+                      - id: 555e0767-666a-49f7-b99a-88c4305916ba
+                        status: true
+                        filename: random.pdf
+                        created_at: '2024-03-28T09:32:53.584085Z'
+                        success: true
+                        hash: 193ab2cadcffc17e0113fc96711ccfbd527b8c54ee6ab379c70e3aac65afa5fa
+                        integrity:
+                          enabled: true
+                          anchor_id: 450361
+      operationId: get-v1-process-list
+      x-stoplight:
+        id: 9i4baugalxg76
+      description: |
+        This endpoint provides a paginated list containing all tracked processes you have initiated. When submitting a file, numerous pieces of information can be tracked, including:
+
+        - Certification Information: Details regarding certification if the file is sent to a blockchain.
+        - Authenticity Information: If authenticity is enabled, retrieval of the key or certificate information along with the algorithm used.
+        - Encryption Information: Similarly, encryption details are tracked if applicable.
+        - Availability Information: For files using availability, retrieval of the URI where the file was saved, its size, and content type.
+
+        All of this information is systematically saved for each file. Consequently, users can retrieve it as a comprehensive list using this endpoint.
+      security:
+        - {}
+        - secret: []
+      parameters:
+        - schema:
+            type: number
+          in: query
+          name: page
+          description: the page number.
+          required: true
+        - schema:
+            type: number
+          in: query
+          name: per_page
+          description: the number of elements per page.
+          required: true
+  '/v1/process/:id':
+    get:
+      summary: Get Process By ID
+      tags: []
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  id:
+                    type: string
+                  status:
+                    type: boolean
+                  filename:
+                    type: string
+                  created_at:
+                    type: string
+                  success:
+                    type: boolean
+                  hash:
+                    type: string
+                  integrity:
+                    type: object
+                    properties:
+                      enabled:
+                        type: boolean
+                      anchor_id:
+                        type: integer
+                  authenticity:
+                    type: object
+                    properties:
+                      enabled:
+                        type: boolean
+                      signatures:
+                        type: array
+                        items:
+                          type: object
+                          properties:
+                            signature:
+                              type: string
+                            alg:
+                              type: string
+                            kid:
+                              type: string
+                            message_hash:
+                              type: string
+                  encryption:
+                    type: object
+                    properties:
+                      enabled:
+                        type: boolean
+                      key:
+                        type: string
+                      alg:
+                        type: string
+                      subject:
+                        type: string
+                  availability:
+                    type: object
+                    properties:
+                      enabled:
+                        type: boolean
+                      type:
+                        type: string
+                      id:
+                        type: string
+                      url:
+                        type: string
+                      content_type:
+                        type: string
+                      size:
+                        type: integer
+                x-examples:
+                  Example 1:
+                    id: b080fd96-36e0-4691-a0e7-175fc024f65d
+                    status: true
+                    filename: metadata.json
+                    created_at: '2024-03-28T10:07:16.758389Z'
+                    success: true
+                    hash: 32ebbfef67ef4d3f71ab16de443812624b50716553f0731ad8c2a3805fab1d62
+                    integrity:
+                      enabled: true
+                      anchor_id: 450392
+                    authenticity:
+                      enabled: true
+                      signatures:
+                        - signature: c5732fab810fde150977dcfba07780e00f2c970cd11842a8ebbfd7a3dba8f0b3e446389a8496a956cae71e38e95ccfb867a2d1d1db7f872adfb09f1c59481695
+                          alg: ES256K_M
+                          kid: 0465fba5a3a3579f99dd69b4a57e5dc789abce472a34f05ca563b2aea62c0bac7d72ad656abace22aa18e2440f1671005451648004837f8a43f23ba26b3c5427ed
+                          message_hash: 02080c840cb18a91696a1f1ff04938a62d6a65937cffe613f83b4f8ec41fea9c
+                    encryption:
+                      enabled: true
+                      key: |
+                        -----BEGIN PUBLIC KEY-----
+                        MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEAs7aROiIjUvvlHnFTRS0l
+                        fZXB/S2W9pF9lkgqzkpFdCqzG+tnedFRgQ5CnkJYJdVrVRs9yhwymQl+ptkaCe5d
+                        5IJJlKigH58hkg5EMEs3WUheshTBlqx5JGwEA2yXM2k7uew8XaA9tTJcmQokIkbS
+                        bUbZxm99V/dGxUv0BEhribD21mzKUiIRJrLF8zZdsb9xfpjVIxw4gqaSysP2NEKo
+                        p5Uf0Br7F+WsyFowZMBvkmHQdPgyduSdvjmFoEmxEx0vfFo6idIcldoZRRcn6mrf
+                        Sf2vlfOFiaHwu8ERfy3mUmZJpR6K9Ox92/dqUjRTFfhGSiwfK+mr287KCF57r5+0
+                        GQIDAQAB
+                        -----END PUBLIC KEY-----
+                      alg: RSA_M
+                      subject: ''
+                    availability:
+                      enabled: true
+                      type: hosted
+                      id: 7fd526ca-5472-4fa4-a85b-d9cd2b446ec9
+                      url: 'https://cdn.bloock.dev/hosting/v1/hosted/7fd526ca-5472-4fa4-a85b-d9cd2b446ec9'
+                      content_type: ''
+                      size: 5166
+              examples:
+                Example 1:
+                  value:
+                    id: b080fd96-36e0-4691-a0e7-175fc024f65d
+                    status: true
+                    filename: metadata.pdf
+                    created_at: '2024-03-28T10:07:16.758389Z'
+                    success: true
+                    hash: 32ebbfef67ef4d3f71ab16de443812624b50716553f0731ad8c2a3805fab1d62
+                    integrity:
+                      enabled: true
+                      anchor_id: 450392
+                    authenticity:
+                      enabled: true
+                      signatures:
+                        - signature: c5732fab810fde150977dcfba07780e00f2c970cd11842a8ebbfd7a3dba8f0b3e446389a8496a956cae71e38e95ccfb867a2d1d1db7f872adfb09f1c59481695
+                          alg: ES256K_M
+                          kid: 0465fba5a3a3579f99dd69b4a57e5dc789abce472a34f05ca563b2aea62c0bac7d72ad656abace22aa18e2440f1671005451648004837f8a43f23ba26b3c5427ed
+                          message_hash: 02080c840cb18a91696a1f1ff04938a62d6a65937cffe613f83b4f8ec41fea9c
+                    encryption:
+                      enabled: true
+                      key: |
+                        -----BEGIN PUBLIC KEY-----
+                        MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEAs7aROiIjUvvlHnFTRS0l
+                        fZXB/S2W9pF9lkgqzkpFdCqzG+tnedFRgQ5CnkJYJdVrVRs9yhwymQl+ptkaCe5d
+                        5IJJlKigH58hkg5EMEs3WUheshTBlqx5JGwEA2yXM2k7uew8XaA9tTJcmQokIkbS
+                        bUbZxm99V/dGxUv0BEhribD21mzKUiIRJrLF8zZdsb9xfpjVIxw4gqaSysP2NEKo
+                        p5Uf0Br7F+WsyFowZMBvkmHQdPgyduSdvjmFoEmxEx0vfFo6idIcldoZRRcn6mrf
+                        Sf2vlfOFiaHwu8ERfy3mUmZJpR6K9Ox92/dqUjRTFfhGSiwfK+mr287KCF57r5+0
+                        GQIDAQAB
+                        -----END PUBLIC KEY-----
+                      alg: RSA_M
+                      subject: ''
+                    availability:
+                      enabled: true
+                      type: hosted
+                      id: 7fd526ca-5472-4fa4-a85b-d9cd2b446ec9
+                      url: 'https://cdn.bloock.com/hosting/v1/hosted/7fd526ca-5472-4fa4-a85b-d9cd2b446ec9'
+                      content_type: ''
+                      size: 5166
+      operationId: 'get-v1-process-:id'
+      x-stoplight:
+        id: ovb459blp0f7f
+      description: 'This endpoint furnishes information specific to a given process UUID. Its functionality mirrors that of the ''Get Process List'' endpoint, offering identical information.'
+      security:
+        - {}
+        - secret: []
+  '/v1/process/:id/file':
+    get:
+      summary: Get File by Process ID
+      tags: []
+      responses: {}
+      operationId: 'get-v1-process-:id-file'
+      x-stoplight:
+        id: l08pwzlytoeis
+      description: |-
+        This endpoint facilitates the retrieval of any file of the API Managed, identified by its corresponding process id.
+
+        **The process id (UUID identifier) it's returned on "Send File" response endpoint.**
 components:
   schemas:
     KeySource:

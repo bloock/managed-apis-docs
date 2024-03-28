@@ -469,6 +469,7 @@ paths:
                 type: object
                 required:
                   - success
+                  - process_id
                   - hash
                 properties:
                   success:
@@ -480,7 +481,7 @@ paths:
                     type: string
                     x-stoplight:
                       id: x9uj3yo2s7hr8
-                    description: Success status of the operation.
+                    description: The process id created
                   hash:
                     type: string
                     x-stoplight:

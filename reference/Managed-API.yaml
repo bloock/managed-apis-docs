@@ -931,6 +931,7 @@ paths:
         - {}
         - secret: []
         - api-key: []
+      x-internal: true
   /v1/proof:
     post:
       summary: Get Proof
@@ -1078,6 +1079,7 @@ paths:
               Example 1:
                 value:
                   message: 21a0150135e067d0a068384da981fc7b2f1327fa6d0bb582b383dfe599ada3e4
+      x-internal: true
   '/v1/hashes/:id/file':
     get:
       summary: Get File by Hash
@@ -1097,6 +1099,7 @@ paths:
         This endpoint facilitates the retrieval of any file of the API Managed, identified by its corresponding hash.
 
         **The hash it's returned on "Send File" response endpoint.**
+      x-internal: true
     parameters: []
   /v1/process/list:
     get:
@@ -1540,6 +1543,7 @@ paths:
           name: per_page
           description: the number of elements per page.
           required: true
+      x-internal: true
   '/v1/process/:id':
     get:
       summary: Get Process By ID
@@ -1701,6 +1705,7 @@ paths:
       security:
         - {}
         - secret: []
+      x-internal: true
   '/v1/process/:id/file':
     get:
       summary: Get File by Process ID
@@ -1713,6 +1718,7 @@ paths:
         This endpoint facilitates the retrieval of any file of the API Managed, identified by its corresponding process id.
 
         **The process id (UUID identifier) it's returned on "Send File" response endpoint.**
+      x-internal: true
 components:
   schemas:
     KeySource:

@@ -1056,7 +1056,7 @@ paths:
       operationId: post-v1-proof
       x-stoplight:
         id: wv2qfimj7q47c
-      description: 'This endpoint facilitates the retrieval of a BLOOCK integrity proof for a specified aggregated file hash. If you have activated the ''INTEGRITY_AGGREGATE'' configuration flag within your API Managed settings and have previously submitted files with aggregate mode enabled, you can utilize this endpoint to obtain the integrity proof corresponding to a specific file hash.'
+      description: 'This endpoint facilitates the retrieval of a BLOOCK integrity proof for an array of files hash. If you have activated the ''INTEGRITY_AGGREGATE'' configuration flag within your API Managed settings and have previously submitted files with aggregate mode enabled, you can utilize this endpoint to obtain the integrity proof corresponding to an array files hash. It''s important that all the files hash correspond to the same aggregation group or action.'
       security:
         - {}
         - secret: []
@@ -1066,19 +1066,22 @@ paths:
           application/json:
             schema:
               type: object
+              properties:
+                messages:
+                  type: array
+                  items:
+                    type: string
               x-examples:
                 Example 1:
-                  message: 21a0150135e067d0a068384da981fc7b2f1327fa6d0bb582b383dfe599ada3e4
-              required:
-                - message
-              properties:
-                message:
-                  type: string
-                  description: File hash you receive whith the "Send File" response.
+                  messages:
+                    - f7c37955f12f9911bbe1f864a020e29c152e4193b8eb7f9e21352e1a9a4fbe84
+                    - bcedb9859803827fc85099b7da42fcac1cccc21a842bbc6e12aae11a2a61a678
             examples:
               Example 1:
                 value:
-                  message: 21a0150135e067d0a068384da981fc7b2f1327fa6d0bb582b383dfe599ada3e4
+                  messages:
+                    - f7c37955f12f9911bbe1f864a020e29c152e4193b8eb7f9e21352e1a9a4fbe84
+                    - bcedb9859803827fc85099b7da42fcac1cccc21a842bbc6e12aae11a2a61a678
       x-internal: true
   '/v1/hashes/:id/file':
     get:

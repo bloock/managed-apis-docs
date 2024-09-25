@@ -952,6 +952,7 @@ paths:
         - {}
         - api-key: []
         - secret: []
+      x-internal: true
   /v1/verifications:
     post:
       tags:

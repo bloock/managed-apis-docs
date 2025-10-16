@@ -642,15 +642,18 @@ paths:
                   x-stoplight:
                     id: c32m5v0esr99h
                   format: binary
+                  description: 'The file to upload. If not provided, you must specify a `url`.'
                 url:
                   type: string
                   x-stoplight:
                     id: g2xxltyh2gh5w
                   format: uri
+                  description: 'URL of a remote file to upload. If not provided, you must specify a local `file`.'
                 integrity.enabled:
                   type: boolean
                   x-stoplight:
                     id: weqiy55twb5hb
+                  description: 'If enabled, the file''s integrity will be certified. More info [here](https://docs.bloock.com/guides/products/integrity/Overview).'
                 integrity.aggregate:
                   type: boolean
                   x-stoplight:
@@ -660,60 +663,74 @@ paths:
                   type: boolean
                   x-stoplight:
                     id: y4iexp1idt2p7
+                  description: 'If enabled, the file will be digitally signed for authenticity verification. More info [here](https://docs.bloock.com/guides/products/key/overview/).'
                 authenticity.keySource:
                   $ref: '#/components/schemas/KeySource'
                   x-stoplight:
                     id: z1irbxf8bif6h
+                  description: 'Defines the source (local or managed) and type (key or certificate) of the cryptographic resource used for signing. More info about key [types](https://docs.bloock.com/guides/products/key/concepts/about-keys/) and [custody](https://docs.bloock.com/guides/products/key/concepts/key-custody/).'
                 authenticity.key:
                   type: string
                   x-stoplight:
                     id: 9ehrbza4bq21n
                   format: uuid
+                  description: (Only for managed resources) UUID of the cryptographic resource (key or certificate).
                 authenticity.accessEnabled:
                   type: boolean
                   x-stoplight:
                     id: h0xgk6xxpioom
+                  description: '(Only for managed resources) Enable if the cryptographic resource has active access control protection. More info [here](https://docs.bloock.com/guides/products/key/concepts/access-control/).'
                 authenticity.accessType:
                   $ref: '#/components/schemas/AccessControlType'
                   x-stoplight:
                     id: jgbt3ygt5fad7
+                  description: (Only for managed resources) Type of access control protection.
                 authenticity.accessCode:
                   type: string
                   x-stoplight:
                     id: uhikqrbjv1rix
+                  description: (Only for managed resources) The TOTP code or secret.
                 encryption.enabled:
                   type: boolean
                   x-stoplight:
                     id: e2ybqlsdd4r0a
+                  description: 'If enabled, the file will be encrypted for access control protection. More info [here](https://docs.bloock.com/guides/products/key/overview/).'
                 encryption.keySource:
                   $ref: '#/components/schemas/KeySource'
                   x-stoplight:
                     id: fh5avo71o7gpn
+                  description: 'Defines the source (local or managed) and type (key or certificate) of the cryptographic resource used for encryption. More info about key [types](https://docs.bloock.com/guides/products/key/concepts/about-keys/) and [custody](https://docs.bloock.com/guides/products/key/concepts/key-custody/).'
                 encryption.key:
                   type: string
                   x-stoplight:
                     id: ixzcjj0w5wurb
                   format: uuid
+                  description: (Only for managed resources) UUID of the cryptographic resource (key or certificate).
                 encryption.accessEnabled:
                   type: boolean
                   x-stoplight:
                     id: hqvi0xt3vmfnz
+                  description: '(Only for managed resources) Enable if the cryptographic resource has active access control protection. More info [here](https://docs.bloock.com/guides/products/key/concepts/access-control/).'
                 encryption.accessType:
                   $ref: '#/components/schemas/AccessControlType'
                   x-stoplight:
                     id: 0wh9c4awaor4q
+                  description: (Only for managed resources) Type of access control protection.
                 encryption.accessCode:
                   x-stoplight:
                     id: lmi6iduarm9gb
                   type: string
+                  description: (Only for managed resources) The TOTP code or secret.
                 availability.enabled:
                   type: boolean
                   x-stoplight:
                     id: 91itknfc7czo6
+                  description: 'If enabled, the file will be persisted using the defined storage method. More info [here](https://docs.bloock.com/guides/products/availability/overview/).'
                 availability.type:
                   $ref: '#/components/schemas/AvailabilityType'
                   x-stoplight:
                     id: 2d14qyggo8ero
+                  description: 'Defines the storage method. More info [here](https://docs.bloock.com/guides/products/availability/concepts/supported-methods/).'
             examples:
               All actions:
                 value:
